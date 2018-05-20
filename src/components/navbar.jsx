@@ -53,12 +53,14 @@ class NavBar extends React.Component {
   };
 
   render() {
-    const { classes, links , children, navbar} = this.props;
-    const { search_box, title, side_nav} = navbar;
+    const { classes, search_bar, title, side_nav} = this.props;
     const { anchorEl } = this.state;
     const open = Boolean(anchorEl);
-    const searchBar = (search_box.type == "select" ? <SearchBar search_box={search_box}/> : <SearchSelect searches={search_box.searches}/>);
-
+    let searchBar = null;
+    if (search_bar !== undefined) {
+      const searchBar = (search_bar.type == "select" ? <SearchBar search_bar={search_bar}/> : <SearchSelect searches={search_bar.searches}/>);
+    }
+    
     return (
       <AppBar position="static" color="default">
         <Toolbar>

@@ -158,9 +158,7 @@ class SearchBar extends React.Component {
   };
 
   render() {
-    const { classes, search_box } = this.props;
-    const type = search_box.type;
-
+    const { classes, type } = this.props;
 
     return (
       <Autosuggest

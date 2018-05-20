@@ -30,4 +30,4 @@ class Expand extends React.Component {
 	}
 }
 
-export default withStyles(styles)(ProfileHeader);
+export default withStyles(styles)(Expand);

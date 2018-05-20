@@ -7,12 +7,6 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 
-data = [
-{"authors": ["Dionysis Aravantinos"], "description": null, "image_url": "https://www.eurohoops.net/wp-content/uploads/2018/05/doncic_real_cska-600x314.jpg", "keywords": null, "publish_date": "2018/05/18 11:12 PM", "source": "eurohoops.net/en/euroleague/678699/luka-doncic-with-the-best-u-20-performance-in-final-four-history/?utm_campaign=Echobox&utm_medium=Social&utm_source=Twitter", "summary": "", "title": "Luka Doncic with the best U-20 performance in Final Four history", "url": "https://www.eurohoops.net/en/euroleague/678699/luka-doncic-with-the-best-u-20-performance-in-final-four-history/?utm_campaign=Echobox&utm_medium=Social&utm_source=Twitter"}, 
-{"authors": [], "description": "Kansas City seems to have joined Seattle on the short list for an NBA expansion team.", "image_url": "https://s.yimg.com/ny/api/res/1.2/krXvTdG7o03_wbU7BNh65w--/YXBwaWQ9aGlnaGxhbmRlcjt3PTEyODA7aD02NjguOA--/https://s.yimg.com/uu/api/res/1.2/7Cy29VY9XUQA8VbsG2mbIw--~B/aD0yNDkyO3c9NDc2ODtzbT0xO2FwcGlkPXl0YWNoeW9u/http://media.zenfs.com/en/homerun/feed_manager_auto_publish_494/d754af9cf1aa487abf5c720e6b74bf4f", "keywords": null, "publish_date": "2018/05/18 10:30 PM", "source": "sports.yahoo.com/nba-executive-kansas-city-will-get-nba-team-point-233932993.html", "summary": "", "title": "NBA executive: Kansas City will get NBA team 'at some point'", "url": "https://sports.yahoo.com/nba-executive-kansas-city-will-get-nba-team-point-233932993.html"}, 
-{"authors": ["Dave Mcmenamin", "Nick Depaula"], "description": "Phoenix Suns general manager Ryan McDonough says he hasn't ruled out the option of dealing away the No. 1 pick in June's draft for a lower pick -- or even a worthy veteran player.", "image_url": "http://a4.espncdn.com/combiner/i?img=%2Fphoto%2F2018%2F0515%2Fr371108_1296x729_16%2D9.jpg", "keywords": "trade, no. 1 pick, top pick, gm, general manager, ryan mcdonough, nba draft lottery, marvin bagley iii, NBA, NBA Draft, DeAndre Ayton, Luka Doncic, Phoenix Suns, Atlanta Hawks, Sacramento Kings", "publish_date": "2018/05/18 08:15 PM", "source": "espn.com/nba/story/_/id/23540668/phoenix-suns-general-manager-ryan-mcdonough-certainly-open-dealing-no-1-pick", "summary": "", "title": "Phoenix Suns general manager Ryan McDonough 'certainly open' to dealing No. 1 pick", "url": "http://www.espn.com/nba/story/_/id/23540668/phoenix-suns-general-manager-ryan-mcdonough-certainly-open-dealing-no-1-pick"},
-];
-
 const styles = theme => ({
   card: {
     maxWidth: 400,
@@ -27,10 +21,30 @@ const styles = theme => ({
 });
 
 class Paginate extends React.Component {
-  state = {
-    page: 1,
-    data: [],
-    page_data: [],
+  constructor(props) {
+    super(props);
+    let { data, dataurl, per_page } = props;
+    if (dataurl) {
+      axios.get(dataurl).then(res => {
+          data = res.data;
+      });
+    } 
+    this.state = {
+      data: data,
+      page: 1,
+      page_data: data.slice(0, per_page),
+    };
+  }
+
+  updatePage(value) {
+    const { per_page } = this.props;
+    const data = this.state.data;
+    let start = (value - 1) * per_page;
+    let end = start + per_page;
+    this.setState({
+      page: value,
+      page_date: data.slice(start, end)
+    });
   }
 
   get_page_btns(pages, current_page) {
@@ -78,23 +92,16 @@ class Paginate extends React.Component {
   }
 
   render() {
-    const { classes, Component, data, dataurl, per_page } = this.props;
+    const { classes, component, data, dataurl, per_page } = this.props;
     let { component_args } = this.props;
-    if (dataurl) {
-      axios.get(dataurl).then(res => {
-          this.setState({data: res.data});
-      });
-    } else {
-      this.setState({data: data});
-    }
-    let start = (this.state.page - 1) * per_page;
-    let end = start + per_page;
-    this.setState({page_data: this.state.data.slice(start, end)})
+    component_args = component_args || {};
+    component_args.data = this.state.page_data;
+    
     const pages = Math.ceil(this.state.data.length / per_page)
     return (
       <div>
-        <Component data={this.state.page_data} {...component_args}/>
-        <div>{this.get_page_btns()}</div>
+        {component(component_args)}
+        <div>{this.get_page_btns(pages, this.state.page)}</div>
       </div>
     );
   }
