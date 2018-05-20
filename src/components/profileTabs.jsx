@@ -41,10 +41,15 @@ class ProfileTabs extends React.Component {
 
     let tabs = this.props.tabs || testTabs;
     let tabProps = tabs[value];
-    
+    let data = [];
+    if (tabProps.url) {
+      axios.get(dataurl).then(res => {
+          data = res.data;
+      });
+    }
     switch(tabProps.type) {
       case "datatable": {
-        tabContent[value] = <DataTable dataurl={tabProps.url} args={tabProps.args}></DataTable>;
+        tabContent[value] = <DataTable data={data} {...tabProps.args}></DataTable>;
         return tabContent[value];
       }
     }

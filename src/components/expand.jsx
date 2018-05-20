@@ -1,24 +1,29 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 const styles = theme => ({
-  root: {
-  	padding: 5,
-  }
+  heading: {
+    fontSize: theme.typography.pxToRem(15),
+    fontWeight: theme.typography.fontWeightRegular,
+  },
 });
 
 class Expand extends React.Component {
 	render() {
 		const { classes, expand } = this.props;
+		const { label, content } = expand;
 
 		return (
-          	<ExpansionPanel>
+          	<ExpansionPanel {...this.props}>
 		        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-		          <Typography className={classes.heading}>{expand.label}</Typography>
+		          <Typography className={classes.heading}>{label}</Typography>
 		        </ExpansionPanelSummary>
 		        <ExpansionPanelDetails>
-		          {details_batch}
+		          {content}
 		        </ExpansionPanelDetails>
 		    </ExpansionPanel>
 		);

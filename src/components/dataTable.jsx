@@ -230,14 +230,12 @@ class DataTable extends React.Component {
   	};
 
 	render() {
-		const { classes, theme, dataurl } = this.props;
+		const { classes, theme, data } = this.props;
 		console.log(JSON.stringify(theme,null,4));
 		let { columns } = this.props;
 		let visibleColumns = Object.getOwnPropertyNames(this.state.tableData[0]);
-		if (dataurl) {
-			axios.get(dataurl).then(res => {
-		      this.setState({tableData: res.data});
-		    });
+		if (data) {
+			this.setState({tableData: data});
 		}
 		if (columns) {
 			columnLabels = [];

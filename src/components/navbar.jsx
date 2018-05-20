@@ -8,7 +8,8 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import SimpleMenu from './menu';
 import SideNav from './sidenav';
-import SearchBox from './searchBox';
+import SearchBar from './searchBar';
+import SearchSelect from './searchSelect';
 
 
 const styles = {
@@ -52,9 +53,11 @@ class NavBar extends React.Component {
   };
 
   render() {
-    const { classes, links , children, search} = this.props;
+    const { classes, links , children, navbar} = this.props;
+    const { search_box, title, side_nav} = navbar;
     const { anchorEl } = this.state;
     const open = Boolean(anchorEl);
+    const searchBar = (search_box.type == "select" ? <SearchBar search_box={search_box}/> : <SearchSelect searches={search_box.searches}/>);
 
     return (
       <AppBar position="static" color="default">
@@ -63,9 +66,9 @@ class NavBar extends React.Component {
             <MenuIcon />
           </IconButton>
           <Typography variant="title" color="inherit" className={classes.flex}>
-            Statdive
+            {title || "Statdive"}
           </Typography>
-          <SearchBox url={ search }/>
+          {searchBar}
           <div>
             <SimpleMenu></SimpleMenu>
           </div>

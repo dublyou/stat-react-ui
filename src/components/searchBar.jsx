@@ -122,7 +122,7 @@ const styles = theme => ({
   },
 });
 
-class SearchBox extends React.Component {
+class SearchBar extends React.Component {
   state = {
     value: '',
     suggestions: [],
@@ -158,7 +158,9 @@ class SearchBox extends React.Component {
   };
 
   render() {
-    const { classes, object_name } = this.props;
+    const { classes, search_box } = this.props;
+    const type = search_box.type;
+
 
     return (
       <Autosuggest
@@ -186,8 +188,8 @@ class SearchBox extends React.Component {
   }
 }
 
-SearchBox.propTypes = {
+SearchBar.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(SearchBox);
+export default withStyles(styles)(SearchBar);
