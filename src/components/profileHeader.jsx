@@ -3,14 +3,11 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import DetailList from './detailList';
 import Accordion from './accordion';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
+import CustomCard from './customCard';
 
 const styles = theme => ({
   root: {
@@ -35,27 +32,42 @@ const styles = theme => ({
   },
 });
 
+function getHeaderContent(props) {
+	const { classes, name, type, image, details, accordion, cards } = props;
+	let content = [];
+	let subcontent = [];
+
+	switch(type) {
+		case "single":
+			if (name) {
+				content.push(<Typography variant="headline">{name}</Typography>);
+			}
+			let subcontent = [];
+			if (image) {
+				subcontent.push(<div className={classes.container}><img className={classes.image} src={image} alt={name}/></div>);
+			}
+			if (details) {
+				subcontent.push(<DetailList items={details}/>);
+			}
+			if (accordion) {
+				subcontent.push(<Accordion expands={accordion}/>);
+			}
+			content.push(<Card className={classes.card}>{subcontent}</Card>);
+			break;
+		case "cards":
+			content = cards.map((card) => <CustomCard {...card}/>);
+			break;
+	}
+	return content;
+}
+
 class ProfileHeader extends React.Component {
 	render() {
-		const { classes, header } = this.props;
-		const { name, image_path, details, expands} = header;
+		const { classes } = this.props;
 
 		return (
 			<Paper className={classes.root} elevation={4}>
-				<Typography variant="headline">{header.name}</Typography>
-				<Card className={classes.card}>
-					<div className={classes.container}>
-						<img
-						 	className={classes.image}
-							src={header.image_path || 'https://d2p3bygnnzw9w3.cloudfront.net/req/201805011/tlogo/bbr/GSW-2018.png'}
-							alt={header.name}
-				        />
-			        </div>
-			        <div className={classes.details}>
-			          <DetailList items={details}/>
-			          {(expands === undefined) ? "" : <Accordion expands={expands}/>}
-			        </div>
-		    	</Card>
+				{getHeaderContent(this.props)}
 			</Paper>
 		);
 	}

@@ -122,6 +122,8 @@ module.exports = {
         ],
         include: paths.appSrc,
       },
+      { test: /\.json$/, loader: require.resolve('json-loader') },
+      // other loaders
       {
         // "oneOf" will traverse all following loaders until one will
         // match the requirements. When no loader matches it will fall

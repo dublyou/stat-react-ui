@@ -1,6 +1,13 @@
 import React from 'react';
+import NumberFormat from 'react-number-format';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
+import Chip from '@material-ui/core/Chip';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
 import Paper from '@material-ui/core/Paper';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -8,6 +15,36 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import axios from 'axios';
+
+function NumberFormatCustom(props) {
+  const { inputRef, onChange, ...other } = props;
+
+  return (
+    <NumberFormat
+      {...other}
+      ref={inputRef}
+      onValueChange={values => {
+        onChange({
+          target: {
+            value: values.value,
+          },
+        });
+      }}
+      thousandSeparator
+      prefix="$"
+    />
+  );
+  <TextField
+      className={classes.formControl}
+      label="react-number-format"
+      value={numberformat}
+      onChange={this.handleChange('numberformat')}
+      id="formatted-numberformat-input"
+      InputProps={{
+        inputComponent: NumberFormatCustom,
+      }}
+    />
+}
 
 function toTitleCase(str) {
     return str.replace(/_/g, " ").replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
@@ -188,16 +225,99 @@ const sample_data = [
 	{"player_id": 1630, "player_first_name": "Tim", "player_last_name": "Hardaway", "season_year": 2017, "season_league": 0, "team_id": 1, "team_name": "Atlanta Hawks", "team_abbrev": "ATL", "assists_AST": 2.2235, "blocks_BLK": 0.1765, "field_goal_attempts_FGA": 11.6941, "field_goals_FG": 5.2, "free_throw_attempts_FTA": 2.7412, "free_throws_FT": 2.0706, "points_PTS": 14.3529, "rebounds_REB": 2.8235, "steals_STL": 0.6824, "three_point_attempts_3PA": 5.4, "three_pointers_3P": 1.8824, "turnovers_TOV": 1.3647, "field_goal_percentage_FG%": 0.4447, "three_point_percentage_3P%": 0.3486, "free_throw_percentage_FT%": 0.7554}
 ];
 
-const sample_column = [
-	{id: "player_id"},
-	{id: "player_first_name"},
-	{id: "player_last_name"},
-	{id: "season_year"},
-	{id: "season_league"},
-	{id: "team_id"},
-	{id: "team_name"},
-	{id: "team_abbrev"},				
-]
+
+class FilterBox extends React.Component {
+    state = {
+        open: false,
+        selected: null,
+    };
+
+    handleChange = (event) => {
+        const { filterChange } = this.props
+        let value = event.target.value;
+        let id = event.target.getAttribute("id");
+        filterChange(id, value);
+        this.setState({
+            open: true,
+            selected: value,
+        })
+    };
+
+    handleClose = () => {
+        this.setState({
+            open: false,
+            selected: null,
+        });
+    };
+
+    render() {
+        const { filters, type } = this.props;
+        let filter_ids = filters.getOwnPropertyNames();
+        
+        if (type === "url") {
+            return (
+                <div>
+                    {filter_ids.map((value) => {
+                        return (
+                            <FormControl>
+                                <InputLabel htmlFor={value}>{toTitleCase(value)}</InputLabel>
+                                <Select
+                                onChange={filterChange}
+                                inputProps={{
+                                  name: value,
+                                  id: value,
+                                }}
+                                >
+                                    <MenuItem value="">
+                                      <em>None</em>
+                                    </MenuItem>
+                                    {filters[value].options.map((option) => <MenuItem value={option || option.value}>{option.label || toTitleCase(option)}</MenuItem>)}
+                                </Select>
+                            </FormControl>
+                        );
+                    })}
+                </div>
+            );
+        } else {
+            return (
+                <div>
+                    <FormControl>
+                        <InputLabel htmlFor="filter-select">Filters</InputLabel>
+                        <Select
+                        onChange={this.handleChange}
+                        inputProps={{
+                          name: 'filter-select',
+                          id: 'filter-select',
+                        }}
+                        >
+                            <MenuItem value="">
+                              <em>None</em>
+                            </MenuItem>
+                            {filter_ids.map((value) => <MenuItem value={value}>{filters[value] || toTitleCase(value)}</MenuItem>)}
+                        </Select>
+                    </FormControl>
+                    <Dialog
+                      open={this.state.open}
+                      onClose={this.handleClose}
+                      aria-labelledby="form-dialog-title"
+                    >
+                        <DialogTitle id="form-dialog-title">New Filter</DialogTitle>
+                        <DialogContent>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={this.handleClose} color="primary">
+                              Cancel
+                            </Button>
+                            <Button onClick={this.handleClose} color="primary">
+                              Add Filter
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+                </div>
+            );
+        }
+    }
+}
 
 function compare(column, dir) {
   return function(a, b) {
@@ -209,12 +329,39 @@ function compare(column, dir) {
 	};
 }
 
+function filterData(row, id, operand, value) {
+    let data = row[id];
+    switch (operand ) {
+        case ">":
+            return data > value;
+        case "<":
+            return data < value;
+        case "=":
+            return data == value;
+        case ">=":
+            return data >= value;
+        case "<=":
+            return data <= value;
+    }
+}
+
 class DataTable extends React.Component {
-	state = {
-	    sortColumn: 0,
-	    sortDir: 1,
-	    tableData: sample_data,
-	};
+    constructor(props) {
+        super(props);
+        const { paginated, filters, ordering } = props;
+        let order = ordering || data[0].getOwnPropertyNames();
+        let filterValues = {};
+        for (let f in filters.getOwnPropertyNames()) {
+            filterValues[f] = filters[f].default || "";
+        }
+        this.state = {
+            sortColumn: order[0],
+            sortDir: 1,
+            filterValues: filterValues,
+            ordering: order,
+        };
+        this.retrieveData();
+    }
 
 	sortData = (event) => {
 		let value = event.target.getAttribute("id");
@@ -223,53 +370,91 @@ class DataTable extends React.Component {
 		} else {
 			this.setState({sortDir: 1});
 		}
-		this.setState({
-			tableData: this.state.tableData.sort(compare(value, this.state.sortDir)),
-			sortColumn: value,
-		});
+        let data = (this.props.paginated) ? this.retrieveData() : this.state.tableData.sort(compare(value, this.state.sortDir));
+        this.setState({
+            tableData: data,
+            sortColumn: value,
+        });
   	};
 
+    filterChange = (id, value) => {
+        let filters = this.state.filterValues;
+        filters[id] = value;
+        this.setState({
+            filterValues: filters,
+            data: this.retrieveData(),
+        });
+    };
+
+    retrieveData = () => {
+        const { getData, dataurl, paginated } = this.props;
+        let { filterValues, sortColumn, sortDir } = this.state;
+        if (paginated) {
+            let url = dataurl;
+            for (let f in filterValues) {
+                url = url.replace("[=" + f + "=]", filterValues[f]);
+            }
+            axios.get(url).then(res => {
+                data = res.data;
+            });
+        } else {
+            data = getData(filterValues, compare(sortColumn, sortDir));
+        }
+        this.setState({
+            tableData: data
+        });
+    };
+
+    getFilters = () => {
+        const { filters, dataurl } = this.props;
+        let type = (dataurl === undefined) ? "all" : "url";
+        return <FilterBox filters={filters}/>;
+    };
+
+    getColumns = () => {
+        let { columns } = this.props;
+        let { tableData, ordering } = this.state;
+        let renders = {};
+        if (columns !== undefined) {
+            for (let c in columns) {
+                columns[c].label = columns[c].label || toTitleCase(columns[c].id);
+                visible = columns[c].visible;
+                if (visible === undefined || visible) {
+                    renders[c] = columns[c];
+                    if (ordering.indexOf(c)) {
+                        ordering.push(c);
+                    }
+                }
+            }
+        } else {
+            let visibleColumns = Object.getOwnPropertyNames(tableData[0]);
+            for (let value of visibleColumns) {
+                renders[value] = {label: toTitleCase(value)};
+            }
+        }
+        this.setState({ordering: ordering});
+        return create_renders(renders);
+    };
+
 	render() {
-		const { classes, theme, data } = this.props;
-		console.log(JSON.stringify(theme,null,4));
-		let { columns } = this.props;
-		let visibleColumns = Object.getOwnPropertyNames(this.state.tableData[0]);
-		if (data) {
-			this.setState({tableData: data});
-		}
-		if (columns) {
-			columnLabels = [];
-			for (let c of columns) {
-				visible = c.visible;
-				if (visible === undefined || visible) {
-					visibleColumns.push(c.id);
-				}
-			}
-			columns = create_renders(columns);
-		} else {
-			columns = [{id: "name", label: "Name", render: {"type": "html", 
-															"element": "a", 
-															"attrs": {"href": "/players/{{ row.player_id }}/"}, 
-															"text": "{{ row.player_first_name }}&nbsp;{{ row.player_last_name }}"}}];
-			for (let value of visibleColumns) {
-				columns.push({id: value, label: toTitleCase(value)});
-			}
-			columns = create_renders(columns);
-		}
+		const { classes, theme } = this.props;
+		let columns = this.getColumns();
+        let { data, ordering } = this.state;
 
 		return (
 		    <Paper className={classes.root}>
+                {this.getFilters()}
 				<Table className={classes.table}>
 					<TableHead>
 						<TableRow>
-							{columns.map((value, index) => <TableCell onClick={this.sortData} key={value.id} id={value.id} numeric>{value.label || toTitleCase(value.id)}</TableCell>)}
+							{ordering.map((value, index) => <TableCell onClick={this.sortData} key={value} id={value} numeric>{columns[value].label}</TableCell>)}
 						</TableRow>
 					</TableHead>
 					<TableBody>
-					  {this.state.tableData.map((row, index) => {
+					  {data.map((row, index) => {
 					    return (
 					      <TableRow key={index}>
-					      	{columns.map((value, index2) => <TableCell key={index} numeric>{(value.hasOwnProperty("render") ? value.render(row[value.id], "", row) : row[value.id])}</TableCell>)}
+					      	{ordering.map((value, index2) => <TableCell key={index} numeric>{(columns[value].hasOwnProperty("render") ? columns[value].render(row[value], "", row) : row[value])}</TableCell>)}
 					      </TableRow>
 					    );
 					  })}

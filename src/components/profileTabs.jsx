@@ -43,7 +43,7 @@ class ProfileTabs extends React.Component {
     let tabProps = tabs[value];
     let data = [];
     if (tabProps.url) {
-      axios.get(dataurl).then(res => {
+      axios.get(tabProps.url).then(res => {
           data = res.data;
       });
     }
@@ -86,3 +86,4 @@ class ProfileTabs extends React.Component {
 }
 
 export default withStyles(styles)(ProfileTabs);
+

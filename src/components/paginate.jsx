@@ -6,50 +6,96 @@ import classnames from 'classnames';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
+import axios from 'axios';
 
 const styles = theme => ({
-  card: {
-    maxWidth: 400,
+  root: {
+    display: "flex",
+    flexDirection: "column",
   },
-  media: {
-    height: 0,
-    paddingTop: '56.25%', // 16:9
-  },
-  actions: {
-    display: 'flex',
+  children: {
+    margin: "auto",
   },
 });
+
+class PageButton extends React.Component {
+  handleClick = () => {
+    this.props.updatePage(this.props.value);
+  }
+  render() {
+    const { value, color, label } = this.props;
+    return <Button color={color} onClick={this.handleClick}>{label || value}</Button>;
+  }
+}
 
 class Paginate extends React.Component {
   constructor(props) {
     super(props);
     let { data, dataurl, per_page } = props;
-    if (dataurl) {
-      axios.get(dataurl).then(res => {
-          data = res.data;
-      });
+    let filter_url = false;
+    if (dataurl !== undefined) {
+      const url_regex = /\[=[\w\d\-]+=\]/;
+      if (filter_url.test(dataurl)) {
+        data = [];
+        filter_url = true;
+      } else {
+        axios.get(dataurl).then(res => {
+            data = res.data;
+        });
+      }
     } 
     this.state = {
       data: data,
       page: 1,
-      page_data: data.slice(0, per_page),
+      filter_url: filter_url,
     };
   }
 
+  getData(filters, sort) {
+    const { dataurl, per_page } = this.props;
+    let { data, filter_url } = this.state;
+    if (filter_url) {
+        for (let f in filters) {
+            url = url.replace("[=" + f + "=]", filters[f]);
+        }
+    }
+    if (dataurl !== undefined) {
+      axios.get(dataurl).then(res => {
+          data = res.data;
+      });
+    }
+    if (sort !== undefined) {
+      data = data.sort(sort);
+    }
+    this.setState({
+      data: data,
+      page: 1,
+    });
+    return data.slice(0, per_page);
+  }
+
   updatePage(value) {
-    const { per_page } = this.props;
-    const data = this.state.data;
-    let start = (value - 1) * per_page;
-    let end = start + per_page;
     this.setState({
       page: value,
-      page_date: data.slice(start, end)
     });
   }
 
-  get_page_btns(pages, current_page) {
-    let page_buttons = [(current_page == 1) ? <Button disabled color="primary">1</Button> : <Button color="secondary" onChange={this.updatePage(1)}>1</Button>]
-    const btns_displayed = 10
+  getPageContent(value, data) {
+    let { component, component_args, per_page } = this.props;
+    let start = (value - 1) * per_page;
+    let end = start + per_page;
+    component_args = component_args || {};
+    component_args.data = data.slice(start, end);
+    component_args.getData = this.getData.bind(this);
+    component_args.paginated = true;
+    return component(component_args);
+  }
+
+  get_page_btns(current_page, data) {
+    const { per_page } = this.props;
+    const pages = Math.ceil(data.length / per_page);
+    let page_buttons = [(current_page == 1) ? <Button color="primary">1</Button> : <PageButton color="secondary" value={1} updatePage={this.updatePage.bind(this)}/>];
+    const btns_displayed = 10;
     let start = 2;
     let end = pages - 1;
 
@@ -65,43 +111,39 @@ class Paginate extends React.Component {
         start = 2;
       }
       if (start > 2) {
-        page_buttons.push(<Button disabled>...</Button>)
+        page_buttons.push(<Button>...</Button>);
       }
     }
     for (let p = start; p <= end; p++) {
       if (p == current_page) {
-        page_buttons.push(<Button disabled color="primary">{p}</Button>);
+        page_buttons.push(<Button color="primary">{p}</Button>);
       } else {
-        page_buttons.push(<Button color="secondary" onChange={this.updatePage(p)}>{p}</Button>);
+        page_buttons.push(<PageButton color="secondary" value={p} updatePage={this.updatePage.bind(this)}/>);
       }
     }
     /* add ellipsis if there is a number gap between last button and second to last button*/
     if (end > pages - 1) {
-      page_buttons.push(<Button disabled>...</Button>);
+      page_buttons.push(<Button>...</Button>);
     }
-    page_buttons.push((current_page == pages) ? <Button disabled color="primary">pages</Button> : <Button color="secondary" onChange={this.updatePage(pages)}>pages</Button>);
+    page_buttons.push((current_page == pages) ? <Button color="primary">{pages}</Button> : <PageButton color="secondary" value={pages} updatePage={this.updatePage.bind(this)}/>);
     /* add prev button if current page is greater than 1 */
     if (current_page > 1) {
-      page_buttons.shift(<Button color="primary" onChange={this.updatePage(current_page - 1)}>Prev</Button>);
+      page_buttons.unshift(<PageButton color="primary" label="Prev" value={current_page - 1} updatePage={this.updatePage.bind(this)}/>);
     }
     /* add next button if current page is less than the total number of pages*/
     if (current_page < pages) {
-      page_buttons.shift(<Button color="primary" onChange={this.updatePage(current_page + 1)}>Next</Button>);
+      page_buttons.push(<PageButton color="primary" label="Next" value={current_page + 1} updatePage={this.updatePage.bind(this)}/>);
     }
     return page_buttons;
   }
 
   render() {
-    const { classes, component, data, dataurl, per_page } = this.props;
-    let { component_args } = this.props;
-    component_args = component_args || {};
-    component_args.data = this.state.page_data;
-    
-    const pages = Math.ceil(this.state.data.length / per_page)
+    const { classes} = this.props;
+    let { page, data } = this.state;
     return (
-      <div>
-        {component(component_args)}
-        <div>{this.get_page_btns(pages, this.state.page)}</div>
+      <div className={classes.root}>
+        <div className={classes.children}>{this.getPageContent(page, data)}</div>
+        <div className={classes.children}>{this.get_page_btns(page, data)}</div>
       </div>
     );
   }
