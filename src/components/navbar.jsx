@@ -10,6 +10,7 @@ import SimpleMenu from './menu';
 import SideNav from './sidenav';
 import SearchBar from './searchBar';
 import SearchSelect from './searchSelect';
+import SimpleList from './simpleList';
 
 
 const styles = {
@@ -22,6 +23,9 @@ const styles = {
   menuButton: {
     marginLeft: -12,
     marginRight: 20,
+  },
+  list: {
+    width: 250,
   },
 };
 
@@ -71,11 +75,12 @@ class NavBar extends React.Component {
             {title || "Statdive"}
           </Typography>
           {searchBar}
-          <div>
-            <SimpleMenu></SimpleMenu>
-          </div>
         </Toolbar>
-        <SideNav toggle={this.toggleDrawer(false).bind(this)} open={this.state.left}></SideNav>
+        <SideNav toggle={this.toggleDrawer(false).bind(this)} open={this.state.left} items={side_nav}>
+          <div className={classes.list}>
+            <SimpleList items={items}/>
+          </div>
+        </SideNav>
       </AppBar>
     );
   }

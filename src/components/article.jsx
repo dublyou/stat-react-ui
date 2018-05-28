@@ -34,12 +34,13 @@ const styles = theme => ({
 class Article extends React.Component {
 
   render() {
-    const { classes, url, source, publish_date, title, authors, image_url, description, summary } = this.props;
+    const { classes, url, source, publish_date, title, authors, image_url, description, summary, width } = this.props;
     const MyLink = props => <a target="_blank" href={url} {...props}>{props.children}</a>;
+    const card_size = {width: width || 800}
 
     return (
       <div>
-        <Card className={classes.card}>
+        <Card styles={card_size}>
           <CardHeader
             action={
               <IconButton component={MyLink}>

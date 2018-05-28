@@ -4,10 +4,11 @@ import ProfileTabs from '../components/profileTabs'
 
 class Profile extends React.Component {
 	render() {
+		const { header, tabs } = this.props;
 		return (
 			<div >
-				<ProfileHeader></ProfileHeader>
-				<ProfileTabs></ProfileTabs>
+				<ProfileHeader {...header}></ProfileHeader>
+				<ProfileTabs tabs={tabs}></ProfileTabs>
 			</div>
 		)
 	}

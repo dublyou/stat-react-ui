@@ -6,45 +6,9 @@ import parse from 'autosuggest-highlight/parse';
 import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
 import MenuItem from '@material-ui/core/MenuItem';
+import ListItemText from '@material-ui/core/ListItemText';
 import { withStyles } from '@material-ui/core/styles';
 import axios from 'axios';
-
-const defaultSuggestions = [
-  {label: 'Michael Zeno', url: '/players/id/'},
-  {label: 'Michael Redd', url: '/players/id/'},
-  {label: 'Michael Tait', url: '/players/id/'},
-  {label: 'Michael Cage', url: '/players/id/'},
-  {label: 'Michael Eric', url: '/players/id/'},
-  {label: 'Michael Pitts', url: '/players/id/'},
-  {label: 'Michael Payne', url: '/players/id/'},
-  {label: 'Michael Smith', url: '/players/id/'},
-  {label: 'Michael Britt', url: '/players/id/'},
-  {label: 'Michael Curry', url: '/players/id/'},
-  {label: 'Michael Young', url: '/players/id/'},
-  {label: 'Michael Wiley', url: '/players/id/'},
-  {label: 'Michael Smith', url: '/players/id/'},
-  {label: 'Michael Adams', url: '/players/id/'},
-  {label: 'Michael Ruffin', url: '/players/id/'},
-  {label: 'Michael Ansley', url: '/players/id/'},
-  {label: 'Michael Brooks', url: '/players/id/'},
-  {label: 'Michael Cooper', url: '/players/id/'},
-  {label: 'Michael Doleac', url: '/players/id/'},
-  {label: 'Michael Finley', url: '/players/id/'},
-  {label: 'Michael Phelps', url: '/players/id/'},
-  {label: 'Michael Wilson', url: '/players/id/'},
-  {label: 'Michael Thomas', url: '/players/id/'},
-  {label: 'Michael Graham', url: '/players/id/'},
-  {label: 'Michael McCombs', url: '/players/id/'},
-  {label: 'Michael Gerren', url: '/players/id/'},
-  {label: 'Michael Mitchell', url: '/players/id/'},
-  {label: 'Michael Wright', url: '/players/id/'},
-  {label: 'Michael Foster', url: '/players/id/'},
-  {label: 'Michael Vicens', url: '/players/id/'},
-  {label: 'Michael Qualls', url: '/players/id/'},
-  {label: 'Michael Jordan', url: '/players/id/'},
-  {label: 'Michael Jackson', url: '/players/id/'},
-  {label: 'Michael Edwards', url: '/players/id/'},
-]
 
 function renderInput(inputProps) {
   const { classes, ref, ...other } = inputProps;
@@ -68,8 +32,9 @@ function renderSuggestion(suggestion, { query, isHighlighted }) {
   const parts = parse(suggestion.label, matches);
 
   return (
-    <MenuItem selected={isHighlighted} component="div">
-      <a href={suggestion.url}>
+    <MenuItem button selected={isHighlighted} component="a" href={suggestion.url}>
+      <Avatar alt={suggestion.name} src={suggestion.image} />
+      <ListItemText>
         {parts.map((part, index) => {
           return part.highlight ? (
             <span key={String(index)} style={{ fontWeight: 300 }}>
@@ -81,7 +46,7 @@ function renderSuggestion(suggestion, { query, isHighlighted }) {
             </strong>
           );
         })}
-      </a>
+      </ListItemText>
     </MenuItem>
   );
 }
@@ -98,6 +63,27 @@ function renderSuggestionsContainer(options) {
 
 function getSuggestionValue(suggestion) {
   return suggestion.label;
+}
+
+function getSuggestions(suggestions, value) {
+  const inputValue = value.trim().toLowerCase();
+  const inputLength = inputValue.length;
+  let count = 0;
+
+  if (inputLength > 0) {
+    return suggestions.filter(suggestion => {
+      const suggestionParts = suggestion.label.split(" ");
+      suggestionParts.unshift(suggestion.label);
+      for (let part of suggestionParts) {
+        part = part.toLowerCase().slice(0, inputLength);
+        if (part === inputValue) {
+          return true;
+        }
+      }
+      return false;
+    });
+  }
+  return [];
 }
 
 const styles = theme => ({
@@ -123,21 +109,41 @@ const styles = theme => ({
 });
 
 class SearchBar extends React.Component {
-  state = {
-    value: '',
-    suggestions: [],
-  };
-
-  handleSuggestionsFetchRequested = ({ value }) => {
-    const { url } = this.props;
-    const inputValue = value.trim().toLowerCase();
-    let suggestions = defaultSuggestions;
-    if (url) {
-      const dataurl = `${url}${inputValue}/`;
-      suggestions = this.state.suggestions;
-      axios.get(dataurl).then(res => {
+  constructor(props) {
+    super(props);
+    const { url, type } = props;
+    let suggestions = [];
+    if (type == "load") {
+      axios.get(url).then(res => {
         suggestions = res;
       });
+    }
+    this.state = {
+        value: '',
+        suggestions: [],
+        originalSuggestions: suggestions,
+    };
+  }
+
+  handleSuggestionsFetchRequested = ({ value }) => {
+    const { url, type } = this.props;
+    const inputValue = value.trim().toLowerCase();
+    const inputLength = inputValue.length;
+    let { suggestions, originalSuggestions } = this.state;
+    if (type == "fetch") {
+      if (inputLength > 5) {
+        suggestions = getSuggestions(originalSuggestions, inputValue);
+      } else if (inputLength > 4) {
+        const dataurl = `${url}${inputValue}/`;
+        axios.get(dataurl).then(res => {
+          suggestions = res;
+        });
+        this.setState({
+          originalSuggestions: suggestions,
+        });
+      }
+    } else {
+      suggestions = getSuggestions(originalSuggestions, inputValue);
     }
     
     this.setState({
@@ -158,7 +164,7 @@ class SearchBar extends React.Component {
   };
 
   render() {
-    const { classes, type } = this.props;
+    const { classes, label } = this.props;
 
     return (
       <Autosuggest
@@ -177,7 +183,7 @@ class SearchBar extends React.Component {
         renderSuggestion={renderSuggestion}
         inputProps={{
           classes,
-          placeholder: `Search for a ${object_name}`,
+          placeholder: `Search for a ${label}`,
           value: this.state.value,
           onChange: this.handleChange,
         }}

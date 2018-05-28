@@ -348,17 +348,14 @@ function filterData(row, id, operand, value) {
 class DataTable extends React.Component {
     constructor(props) {
         super(props);
-        const { paginated, filters, ordering } = props;
-        let order = ordering || data[0].getOwnPropertyNames();
+        const { paginated, filters } = props;
         let filterValues = {};
         for (let f in filters.getOwnPropertyNames()) {
             filterValues[f] = filters[f].default || "";
         }
         this.state = {
-            sortColumn: order[0],
             sortDir: 1,
             filterValues: filterValues,
-            ordering: order,
         };
         this.retrieveData();
     }
@@ -388,8 +385,11 @@ class DataTable extends React.Component {
 
     retrieveData = () => {
         const { getData, dataurl, paginated } = this.props;
+        let { data, ordering } = this.props;
         let { filterValues, sortColumn, sortDir } = this.state;
         if (paginated) {
+            data = getData(filterValues, compare(sortColumn, sortDir));
+        } else if (dataurl !== undefined) {
             let url = dataurl;
             for (let f in filterValues) {
                 url = url.replace("[=" + f + "=]", filterValues[f]);
@@ -397,11 +397,12 @@ class DataTable extends React.Component {
             axios.get(url).then(res => {
                 data = res.data;
             });
-        } else {
-            data = getData(filterValues, compare(sortColumn, sortDir));
         }
+        ordering = ordering || data[0].getOwnPropertyNames();
         this.setState({
-            tableData: data
+            sortColumn: ordering[0],
+            tableData: data,
+            ordering: ordering,
         });
     };
 

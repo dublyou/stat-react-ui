@@ -25,7 +25,7 @@ class SearchSelect extends React.Component {
 
     return (
       <div>
-        <SearchBox search_box={searches[this.state.value]}/>
+        <SearchBar label={this.state.value} search_box={searches[this.state.value]}/>
         <Select
             native
             value={this.state.value}

@@ -31,12 +31,19 @@ class DetailList extends React.Component {
 		for (let label in items) {
 			if (i > 0 && i % batch_size === 0) {
 				details.push(<List dense={true} key={i}>{details_batch}</List>);
-				details_batch= [];
+				list_batch= [];
 			}
-			details_batch.push(<ListItem key={i}><span className={classes.label}>{toTitleCase(label)}:&nbsp;</span><ListItemText primary={items[label]}/></ListItem>);
+			let { text, url } = items[label];
+			let li_args = {};
+			if (url !== undefined) {
+				li_args["href"] = url;
+				li_args["component"] = "a";
+			}
+			list_batch.push(<ListItem key={i}><span className={classes.label}>{toTitleCase(label)}:&nbsp;</span><ListItemText {...li_args} primary={items[label]}/></ListItem>);
+			i++;
 		}
 		if (details.length > 0) {
-			details.push(<List dense={true} key="13">{list_batch}</List>);
+			details.push(<List dense={true} key={i}>{list_batch}</List>);
 		}
 		return (
 			<div>

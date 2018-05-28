@@ -138,7 +138,7 @@ class Paginate extends React.Component {
   }
 
   render() {
-    const { classes} = this.props;
+    const { classes } = this.props;
     let { page, data } = this.state;
     return (
       <div className={classes.root}>

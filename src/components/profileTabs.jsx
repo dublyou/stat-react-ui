@@ -7,6 +7,7 @@ import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import DataTable from './dataTable';
+import Paginate from './paginate';
 
 
 const styles = theme => ({
@@ -49,6 +50,12 @@ class ProfileTabs extends React.Component {
     }
     switch(tabProps.type) {
       case "datatable": {
+        const { paginate } = tabProps.args;
+        if (paginate) {
+          const { per_page } = tabProps.args;
+          const datatable = (props) => { return <DataTable {...props}/>;};
+          tabContent[value] = <Paginate per_page={per_page} component={datatable} component_args={tabProps.args}/>
+        }
         tabContent[value] = <DataTable data={data} {...tabProps.args}></DataTable>;
         return tabContent[value];
       }
