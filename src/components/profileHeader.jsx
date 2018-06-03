@@ -45,7 +45,7 @@ function getHeaderContent(props) {
 			}
 			let subcontent = [];
 			if (image) {
-				subcontent.push(<div className={classes.container}><img className={classes.image} src={image} alt={name}/></div>);
+				subcontent.push(<div className={classes.container}><img className={classes.image} src={image} alt={heading || "image"}/></div>);
 			}
 			if (details) {
 				subcontent.push(<DetailList key={2} items={details}/>);
