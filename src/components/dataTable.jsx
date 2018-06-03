@@ -2,7 +2,13 @@ import React from 'react';
 import NumberFormat from 'react-number-format';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
 import Chip from '@material-ui/core/Chip';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
@@ -88,72 +94,58 @@ function toCurrency(x) {
 function render_func(params) {
     var type = params.type,
         func;
-
     var parse_vars = function (string, data, type, row) {
-        var regex = /{{\s*(data|type|row)(?:.(\w+))?\s*}}/g,
+        let regex = /{{\s*(?:data|type|row)(?:.(\w+))?\s*}}/g,
             matches = string.match(regex),
             return_string = string;
-
-        for (var i = 0; i < matches.length; i++) {
-            var capture =  matches[i].match(/^{{\s*(data|type|row)(?:.(\w+))?\s*}}$/)
-            switch (capture[1]) {
-                case "data":
-                    return_string.replace(matches[i], data);
-                    break;
-                case "row":
-                    return_string.replace(matches[i], row[capture[2]])
-                    break;
-                case "type":
-                    return_string.replace(matches[i], type);
-                    break;
+        if (matches) {
+            for (var i = 0; i < matches.length; i++) {
+                var capture =  matches[i].match(/^{{\s*(data|type|row)(?:.(\w+))?\s*}}$/)
+                switch (capture[1]) {
+                    case "data":
+                        return_string = return_string.replace(matches[i], data);
+                        break;
+                    case "row":
+                        return_string = return_string.replace(matches[i], row[capture[2]]);
+                        break;
+                    case "type":
+                        return_string = return_string.replace(matches[i], type);
+                        break;
+                }
             }
-
         }
         return return_string;
     };
     switch(type) {
         case "html":
             func = function ( data, type, row ) {
-                let { element, text, before, after, attrs } = params
-                var attr_str = "",
-                    inner_text = text || "",
-                    after_text = after || "";
-                    before_text = before || "";
-                element = element || "div";
+                const { element, text, before, after, attrs } = params;
+                let props = {};
 
-                for (var attr in attrs) {
-                    if (attrs.hasOwnProperty(attr)) {
-                        attr_str += attr + '="' + attrs[attr] + '" '
+                for (let attr in attrs) {
+                    props[attr] = parse_vars(attrs[attr], data, type, row);
+                }
+
+                let texts = [before, text, after];
+                for (let i = 0; i < texts.length; i++) {
+                    if (texts[i]) {
+                        texts[i] = parse_vars(texts[i], data, type, row);
                     }
                 }
-                var string = `${before_text}<${element} ${attr_str}>${inner_text}</${element}>${after_text}`, /*'<' + element + attr_str + '>' + inner_text + '</' + element + '>' + after_text,*/
-                    regex = /{{\s*(data|type|row)(?:.(\w+))?\s*}}/g,
-                    matches = string.match(regex),
-                    return_string = string;
-
-                for (var i = 0; i < matches.length; i++) {
-                    var capture =  matches[i].match(/^{{\s*(data|type|row)(?:.(\w+))?\s*}}$/)
-                    switch (capture[1]) {
-                        case "data":
-                            return_string = return_string.replace(matches[i], data);
-                            break;
-                        case "row":
-                            return_string = return_string.replace(matches[i], row[capture[2]])
-                            break;
-                        case "type":
-                            return_string = return_string.replace(matches[i], type);
-                            break;
-                    }
-
+                
+                switch(element) {
+                    case "a":
+                        return <div>{texts[0]}<a {...props}>{texts[1]}</a>{texts[2]}</div>;
+                    default:
+                        return <div>{texts[0]}<span {...props}>{texts[1]}</span>{texts[2]}</div>;
                 }
-                return return_string;
             };
             break;
         case "percent":
             var decimal_places = params.decimal_places || 0;
             func =  function ( data, type, row ) {
                 if (typeof data !== undefined && data !== null && data !== "N/A") {
-                    return Number(Math.round(data+'e' + decimal_places)+'e-' + decimal_places) + "%";
+                    return Number(Math.round(data+'e'+(decimal_places+2))+'e-' + decimal_places) + "%";
                 } else {
                     return "";
                 }
@@ -186,24 +178,28 @@ function render_func(params) {
                     return "";
                 }
             };
+            console.log(decimal_places);
             break;
+        default:
+            func = function(data, type, row) {
+                return data;
+            };
     }
     return func;
 }
 
 function create_renders(columns) {
-    for(var i = 0; i < columns.length; i++) {
-        if (columns[i].hasOwnProperty("render")) {
-            columns[i].render = render_func(columns[i].render);
+    for(let c in columns) {
+        if (columns[c].hasOwnProperty("render")) {
+            columns[c].render = render_func(columns[c].render);
         }
-        if (columns[i].hasOwnProperty("createdCell")) {
-            columns[i].createdCell = function (td, cellData, rowData, row, col) {
+        if (columns[c].hasOwnProperty("createdCell")) {
+            columns[c].createdCell = function (td, cellData, rowData, row, col) {
                  if ( cellData < 0 ) {
                     $(td).css('color', 'red')
                  } else if ( cellData > 0 ) {
                      $(td).css('color', 'green')
                  }
-
             };
         }
     }
@@ -221,14 +217,26 @@ const styles = theme => ({
   },
   tableRow: {
     height: 30,
+    backgroundColor: theme.palette.grey[200],
     '&:nth-of-type(odd)': {
-      backgroundColor: theme.palette.grey[700],
+      backgroundColor: theme.palette.grey[300],
     },
+    '&:hover': {
+        backgroundColor: theme.palette.grey[400]
+    }
   },
   tableCell: {
     paddingLeft: 10,
     paddingRight: 10,
+    textAlign: "left",
   },
+  tableBodyCell: {
+    color: theme.palette.grey[900],
+    paddingLeft: 10,
+    paddingRight: 10,
+    borderBottom: "1px solid #fff",
+    textAlign: "left",
+  }
 });
 
 class FilterBox extends React.Component {
@@ -356,7 +364,7 @@ class DataTable extends React.Component {
         const { paginated, filters } = props;
         let filterValues = {};
         if (filters) {
-            for (let f in filters.getOwnPropertyNames()) {
+            for (let f in filters) {
                 filterValues[f] = filters[f].default || "";
             }
         }
@@ -425,7 +433,7 @@ class DataTable extends React.Component {
         let { data, ordering } = this.state;
         let columns = {};
         renders = renders || {};
-        ordering = ordering || Object.getOwnPropertyNames(data[0]);
+        ordering = ordering;
         for (let value of ordering) {
             columns[value] = {label: toTitleCase(value)};
             if (renders.hasOwnProperty(value)) {
@@ -453,7 +461,7 @@ class DataTable extends React.Component {
 					  {data.map((row, index) => {
 					    return (
 					      <TableRow className={classes.tableRow} key={index}>
-					      	{ordering.map((value, index2) => <TableCell className={classes.tableCell} key={index2*index + index2} numeric>{(columns[value].hasOwnProperty("render") ? columns[value].render(row[value], "", row) : row[value])}</TableCell>)}
+					      	{ordering.map((value, index2) => <TableCell className={classes.tableBodyCell} key={index2*index + index2} numeric>{(columns[value].hasOwnProperty("render") ? columns[value].render(row[value], "", row) : row[value])}</TableCell>)}
 					      </TableRow>
 					    );
 					  })}
