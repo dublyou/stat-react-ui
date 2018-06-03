@@ -40,7 +40,7 @@ function NumberFormatCustom(props) {
       prefix="$"
     />
   );
-  <TextField
+  /*<TextField
       className={classes.formControl}
       label="react-number-format"
       value={numberformat}
@@ -49,7 +49,7 @@ function NumberFormatCustom(props) {
       InputProps={{
         inputComponent: NumberFormatCustom,
       }}
-    />
+    />*/
 }
 
 function toTitleCase(str) {
@@ -195,11 +195,7 @@ function create_renders(columns) {
         }
         if (columns[c].hasOwnProperty("createdCell")) {
             columns[c].createdCell = function (td, cellData, rowData, row, col) {
-                 if ( cellData < 0 ) {
-                    $(td).css('color', 'red')
-                 } else if ( cellData > 0 ) {
-                     $(td).css('color', 'green')
-                 }
+                 return td;
             };
         }
     }
