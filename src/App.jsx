@@ -4,6 +4,7 @@ import createMuiTheme from 'material-ui/styles/createMuiTheme';
 import Profile from './pages/profile';
 import Articles from './pages/articles';
 import SimplePage from './pages/simple';
+import GridPage from './pages/grid';
 import Navbar from './components/navbar';
 import logo from './logo.svg';
 import './App.css';
@@ -39,6 +40,8 @@ class App extends Component {
         return <Articles {...args}/>;
       case "simple":
         return <SimplePage {...args}/>;
+      case "grid":
+        return <GridPage {...args}/>;
     }
   }
   render() {

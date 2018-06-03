@@ -31,15 +31,15 @@ class PageButton extends React.Component {
 class Paginate extends React.Component {
   constructor(props) {
     super(props);
-    let { data, dataurl, per_page } = props;
+    let { data, url, per_page } = props;
     let filter_url = false;
-    if (dataurl !== undefined) {
+    if (url !== undefined) {
       const url_regex = /\[=[\w\d\-]+=\]/;
-      if (filter_url.test(dataurl)) {
+      if (filter_url.test(url)) {
         data = [];
         filter_url = true;
       } else {
-        axios.get(dataurl).then(res => {
+        axios.get(url).then(res => {
             data = res.data;
         });
       }
@@ -52,15 +52,15 @@ class Paginate extends React.Component {
   }
 
   getData(filters, sort) {
-    const { dataurl, per_page } = this.props;
+    const { url, per_page } = this.props;
     let { data, filter_url } = this.state;
     if (filter_url) {
         for (let f in filters) {
             url = url.replace("[=" + f + "=]", filters[f]);
         }
     }
-    if (dataurl !== undefined) {
-      axios.get(dataurl).then(res => {
+    if (url !== undefined) {
+      axios.get(url).then(res => {
           data = res.data;
       });
     }

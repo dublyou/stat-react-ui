@@ -17,7 +17,7 @@ const styles = theme => ({
 });
 
 function articleList(props) {
-  const { classes, data } = props;
+  const { data } = props;
   return (
   	<div style={{maxHeight: 550, overflowY: "scroll"}}>
   		{data.map((row) => <Article {...row}/>)}
@@ -26,15 +26,16 @@ function articleList(props) {
 }
 class Articles extends React.Component {
 	render() {
-		const { classes } = this.props;
-		let { articles } = this.props;
-		articles = articles || {per_page: 5, width: 400};
-		if (articles.url === undefined) {
-			articles.data = articles.data || sample_data;
+		const { classes, url } = this.props;
+		let { per_page, width, data } = this.props;
+		per_page = per_page || 5;
+		width = width || 400;
+		if (url === undefined) {
+			data = data || sample_data;
 		}
 		return (
 			<Paper>
-				<Paginate component={articleList} {...articles}/>
+				<Paginate component={articleList} {...{url, data, per_page, width}}/>
 			</Paper>
 		)
 	}

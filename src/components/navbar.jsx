@@ -79,7 +79,7 @@ class NavBar extends React.Component {
         </Toolbar>
         <SideNav toggle={this.toggleDrawer(false).bind(this)} open={this.state.left}>
           <div className={classes.list}>
-            <SimpleList items={side_nav}/>
+            <SimpleList component="a" items={side_nav}/>
           </div>
         </SideNav>
       </AppBar>

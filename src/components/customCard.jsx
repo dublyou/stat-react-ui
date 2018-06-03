@@ -58,7 +58,7 @@ function cardContent(props) {
 	return (
 		<CardContent>
 			{children.map((props) => typography(props))}
-        </CardContent>
+    </CardContent>
 	);
 }
 
