@@ -3,6 +3,7 @@ import Autosuggest from 'react-autosuggest';
 import PropTypes from 'prop-types';
 import match from 'autosuggest-highlight/match';
 import parse from 'autosuggest-highlight/parse';
+import Avatar from '@material-ui/core/Avatar';
 import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
 import MenuItem from '@material-ui/core/MenuItem';
