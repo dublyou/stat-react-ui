@@ -13,10 +13,21 @@ function toTitleCase(str) {
 }
 
 const styles = theme => ({
-  label: {
-  	color: theme.palette.text.secondary,
-  	fontSize: theme.typography.pxToRem(12),
-  }
+	root: {
+		display: "flex",
+		flexWrap: "wrap",
+	},
+	listitem: {
+		paddingTop: 4,
+		paddingBottom: 4,
+	},
+	label: {
+		color: theme.palette.text.secondary,
+		fontSize: theme.typography.pxToRem(12),
+	},
+	info: {
+		textAlign: "right",
+	}
 });
 
 class DetailList extends React.Component {
@@ -27,10 +38,9 @@ class DetailList extends React.Component {
 		let i = 0;
 		const batch_size = 5;
 
-
 		for (let label in items) {
 			if (i > 0 && i % batch_size === 0) {
-				details.push(<List dense={true} key={i}>{details_batch}</List>);
+				details.push(<List dense={true} key={i/batch_size}>{list_batch}</List>);
 				list_batch= [];
 			}
 			let { text, url } = items[label];
@@ -39,14 +49,14 @@ class DetailList extends React.Component {
 				li_args["href"] = url;
 				li_args["component"] = "a";
 			}
-			list_batch.push(<ListItem key={i}><span className={classes.label}>{toTitleCase(label)}:&nbsp;</span><ListItemText {...li_args} primary={items[label]}/></ListItem>);
+			list_batch.push(<ListItem key={i} className={classes.listitem}><span className={classes.label}>{toTitleCase(label)}:&nbsp;</span><ListItemText className={classes.info} {...li_args} primary={items[label].text}/></ListItem>);
 			i++;
 		}
-		if (details.length > 0) {
-			details.push(<List dense={true} key={i}>{list_batch}</List>);
+		if (list_batch.length > 0) {
+			details.push(<List dense={true} key={details.length + 1}>{list_batch}</List>);
 		}
 		return (
-			<div>
+			<div className={classes.root}>
 				{details}
 			</div>
 		);

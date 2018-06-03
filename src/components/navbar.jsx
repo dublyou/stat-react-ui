@@ -62,7 +62,8 @@ class NavBar extends React.Component {
     const open = Boolean(anchorEl);
     let searchBar = null;
     if (search_bar !== undefined) {
-      const searchBar = (search_bar.type == "select" ? <SearchBar search_bar={search_bar}/> : <SearchSelect searches={search_bar.searches}/>);
+      const { type, searches } = search_bar
+      searchBar = (type === "select" ? <SearchSelect searches={searches}/> : <SearchBar search_bar={search_bar}/>);
     }
     
     return (
@@ -76,9 +77,9 @@ class NavBar extends React.Component {
           </Typography>
           {searchBar}
         </Toolbar>
-        <SideNav toggle={this.toggleDrawer(false).bind(this)} open={this.state.left} items={side_nav}>
+        <SideNav toggle={this.toggleDrawer(false).bind(this)} open={this.state.left}>
           <div className={classes.list}>
-            <SimpleList items={items}/>
+            <SimpleList items={side_nav}/>
           </div>
         </SideNav>
       </AppBar>

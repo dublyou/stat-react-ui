@@ -10,6 +10,66 @@ import ListItemText from '@material-ui/core/ListItemText';
 import { withStyles } from '@material-ui/core/styles';
 import axios from 'axios';
 
+const styles = theme => ({
+  container: {
+    flexGrow: .2,
+    position: 'relative',
+  },
+  suggestionsContainerOpen: {
+    position: 'absolute',
+    zIndex: 1,
+    marginTop: theme.spacing.unit,
+    left: 0,
+    right: 0,
+  },
+  suggestion: {
+    display: 'block',
+  },
+  suggestionsList: {
+    margin: 0,
+    padding: 0,
+    listStyleType: 'none',
+  },
+  input: {
+    font: "inherit",
+    border: 0,
+    margin: 0,
+    padding: "6px 0 7px",
+    display: "block",
+    minWidth: 0,
+    flexGrow: 1,
+    boxSizing: "content-box",
+    background: "none",
+    verticalAlign: "middle",
+    "&:focus": {
+      outline: "none",
+    }
+  },
+  searchContainer1: {
+    height: 40,
+    display: "flex",
+    justifyContent: "space-between",
+    boxShadow: "0px 1px 5px 0px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 3px 1px -2px rgba(0, 0, 0, 0.12)",
+    borderRadius: 2,
+    backgroundColor: "#ddd",
+    "&:hover": {
+      backgroundColor: "#fff"
+    }
+  },
+  searchContainer2: {
+    width: "100%",
+    margin: "auto 8px",
+  },
+  searchContainer3: {
+    width: "100%",
+    color: "rgba(0, 0, 0, 0.87)",
+    display: "inline-flex",
+    position: "relative",
+    fontSize: "1rem",
+    lineHeight: "1.1875em",
+  }
+});
+
 function renderInput(inputProps) {
   const { classes, ref, ...other } = inputProps;
 
@@ -27,9 +87,22 @@ function renderInput(inputProps) {
   );
 }
 
+function searchInput(props) {
+  const { classes, ...other } = props;
+  return (
+    <div className={classes.searchContainer1}>
+      <div className={classes.searchContainer2}>
+        <div className={classes.searchContainer3}>
+          <input className={classes.input} {...other} type="text"/>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function renderSuggestion(suggestion, { query, isHighlighted }) {
-  const matches = match(suggestion.label, query);
-  const parts = parse(suggestion.label, matches);
+  const matches = match(suggestion.name, query);
+  const parts = parse(suggestion.name, matches);
 
   return (
     <MenuItem button selected={isHighlighted} component="a" href={suggestion.url}>
@@ -62,7 +135,7 @@ function renderSuggestionsContainer(options) {
 }
 
 function getSuggestionValue(suggestion) {
-  return suggestion.label;
+  return suggestion.name;
 }
 
 function getSuggestions(suggestions, value) {
@@ -72,8 +145,8 @@ function getSuggestions(suggestions, value) {
 
   if (inputLength > 0) {
     return suggestions.filter(suggestion => {
-      const suggestionParts = suggestion.label.split(" ");
-      suggestionParts.unshift(suggestion.label);
+      const suggestionParts = suggestion.name.split(" ");
+      suggestionParts.unshift(suggestion.name);
       for (let part of suggestionParts) {
         part = part.toLowerCase().slice(0, inputLength);
         if (part === inputValue) {
@@ -85,28 +158,6 @@ function getSuggestions(suggestions, value) {
   }
   return [];
 }
-
-const styles = theme => ({
-  container: {
-    flexGrow: .2,
-    position: 'relative',
-  },
-  suggestionsContainerOpen: {
-    position: 'absolute',
-    zIndex: 1,
-    marginTop: theme.spacing.unit,
-    left: 0,
-    right: 0,
-  },
-  suggestion: {
-    display: 'block',
-  },
-  suggestionsList: {
-    margin: 0,
-    padding: 0,
-    listStyleType: 'none',
-  },
-});
 
 class SearchBar extends React.Component {
   constructor(props) {
@@ -174,7 +225,7 @@ class SearchBar extends React.Component {
           suggestionsList: classes.suggestionsList,
           suggestion: classes.suggestion,
         }}
-        renderInputComponent={renderInput}
+        renderInputComponent={searchInput}
         suggestions={this.state.suggestions}
         onSuggestionsFetchRequested={this.handleSuggestionsFetchRequested}
         onSuggestionsClearRequested={this.handleSuggestionsClearRequested}
@@ -183,7 +234,7 @@ class SearchBar extends React.Component {
         renderSuggestion={renderSuggestion}
         inputProps={{
           classes,
-          placeholder: `Search for a ${label}`,
+          placeholder: `Search for ${label}...`,
           value: this.state.value,
           onChange: this.handleChange,
         }}

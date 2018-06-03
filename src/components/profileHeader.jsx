@@ -12,6 +12,7 @@ import CustomCard from './customCard';
 const styles = theme => ({
   root: {
   	padding: 5,
+  	borderRadius: 0,
   },
   card: {
     display: 'flex',
@@ -27,27 +28,27 @@ const styles = theme => ({
    	width: "100%"
   },
   container: {
-  	maxWidth: 250,
+  	maxWidth: 150,
   	width: "100%"
   },
 });
 
 function getHeaderContent(props) {
-	const { classes, name, type, image, details, accordion, cards } = props;
+	let { classes, heading, type, image, details, accordion, cards } = props;
 	let content = [];
 	let subcontent = [];
-
+	type = type || "single";
 	switch(type) {
 		case "single":
-			if (name) {
-				content.push(<Typography variant="headline">{name}</Typography>);
+			if (heading) {
+				content.push(<Typography variant="headline">{heading}</Typography>);
 			}
 			let subcontent = [];
 			if (image) {
 				subcontent.push(<div className={classes.container}><img className={classes.image} src={image} alt={name}/></div>);
 			}
 			if (details) {
-				subcontent.push(<DetailList items={details}/>);
+				subcontent.push(<DetailList key={2} items={details}/>);
 			}
 			if (accordion) {
 				subcontent.push(<Accordion expands={accordion}/>);
@@ -55,7 +56,7 @@ function getHeaderContent(props) {
 			content.push(<Card className={classes.card}>{subcontent}</Card>);
 			break;
 		case "cards":
-			content = cards.map((card) => <CustomCard {...card}/>);
+			content = cards.map((card, index) => <CustomCard index={index} {...card}/>);
 			break;
 	}
 	return content;
@@ -66,7 +67,7 @@ class ProfileHeader extends React.Component {
 		const { classes } = this.props;
 
 		return (
-			<Paper className={classes.root} elevation={4}>
+			<Paper className={classes.root} elevation={2}>
 				{getHeaderContent(this.props)}
 			</Paper>
 		);

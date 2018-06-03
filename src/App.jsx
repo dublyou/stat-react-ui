@@ -3,12 +3,20 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import createMuiTheme from 'material-ui/styles/createMuiTheme';
 import Profile from './pages/profile';
 import Articles from './pages/articles';
+import SimplePage from './pages/simple';
 import Navbar from './components/navbar';
 import logo from './logo.svg';
 import './App.css';
+import sample_args from './sample_data/team_profile';
+/*import { franchise_profile, team_profile, game_profile, player_profile, season_profile } from './sample_data';*/
 
 const rootEl = document.getElementById('root');
-const args = JSON.parse(rootEl.getAttribute("data-args"));
+let args = rootEl.getAttribute("data-args");
+if (args) {
+  args = JSON.parse(args);
+} else {
+  args = sample_args;
+}
 
 const theme = createMuiTheme({
   palette: {
@@ -29,13 +37,15 @@ class App extends Component {
         return <Profile {...args}/>;
       case "articles":
         return <Articles {...args}/>;
+      case "simple":
+        return <SimplePage {...args}/>;
     }
   }
   render() {
-    const { page } = args;
+    const { page, navbar } = args;
     return (
       <MuiThemeProvider theme={theme}>
-        <Navbar {...args.navbar}></Navbar>
+        <Navbar {...navbar}></Navbar>
         {this.get_page(page)}
       </MuiThemeProvider>
     );

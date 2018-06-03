@@ -40,7 +40,7 @@ class Article extends React.Component {
 
     return (
       <div>
-        <Card styles={card_size}>
+        <Card style={card_size}>
           <CardHeader
             action={
               <IconButton component={MyLink}>

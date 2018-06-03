@@ -91,7 +91,7 @@ class Paginate extends React.Component {
     return component(component_args);
   }
 
-  get_page_btns(current_page, data) {
+  getPageButtons(current_page, data) {
     const { per_page } = this.props;
     const pages = Math.ceil(data.length / per_page);
     let page_buttons = [(current_page == 1) ? <Button color="primary">1</Button> : <PageButton color="secondary" value={1} updatePage={this.updatePage.bind(this)}/>];
@@ -143,7 +143,7 @@ class Paginate extends React.Component {
     return (
       <div className={classes.root}>
         <div className={classes.children}>{this.getPageContent(page, data)}</div>
-        <div className={classes.children}>{this.get_page_btns(page, data)}</div>
+        <div className={classes.children}>{this.getPageButtons(page, data)}</div>
       </div>
     );
   }

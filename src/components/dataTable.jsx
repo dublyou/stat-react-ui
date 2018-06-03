@@ -114,18 +114,19 @@ function render_func(params) {
     switch(type) {
         case "html":
             func = function ( data, type, row ) {
-                var attr_str = " ",
-                    element = params.element || "div",
-                    inner_text = params.text || "",
-                    after_text = params.after || "",
-                    attrs = params.attrs;
+                let { element, text, before, after, attrs } = params
+                var attr_str = "",
+                    inner_text = text || "",
+                    after_text = after || "";
+                    before_text = before || "";
+                element = element || "div";
 
-                for (var attr in params.attrs) {
-                    if (params.attrs.hasOwnProperty(attr)) {
-                        attr_str += attr + '="' + params.attrs[attr] + '" '
+                for (var attr in attrs) {
+                    if (attrs.hasOwnProperty(attr)) {
+                        attr_str += attr + '="' + attrs[attr] + '" '
                     }
                 }
-                var string = '<' + element + attr_str + '>' + inner_text + '</' + element + '>' + after_text,
+                var string = `${before_text}<${element} ${attr_str}>${inner_text}</${element}>${after_text}`, /*'<' + element + attr_str + '>' + inner_text + '</' + element + '>' + after_text,*/
                     regex = /{{\s*(data|type|row)(?:.(\w+))?\s*}}/g,
                     matches = string.match(regex),
                     return_string = string;
@@ -160,29 +161,31 @@ function render_func(params) {
             break;
         case "currency":
             var decimal_places = params.decimal_places || 0;
-            if (decimal_places === "vary") {
-                func = function(data, type, row) {
-                    if (typeof data !== undefined && data !== null && data !== "N/A") {
-                        if (data < .01) {
-                            data = Number(Math.round(data+'e6')+'e-6');
-                        } else if (data < 1) {
-                            data = Number(Math.round(data+'e4')+'e-4');
-                        } else {
-                            data = Number(Math.round(data+'e2')+'e-2');
-                            data = data.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                        }
-                        return "$" + data;
+            func = function(data, type, row) {
+                if (typeof data !== undefined && data !== null && data !== "N/A") {
+                    if (data < .01) {
+                        data = Number(Math.round(data+'e6')+'e-6');
+                    } else if (data < 1) {
+                        data = Number(Math.round(data+'e4')+'e-4');
                     } else {
-                        return "";
+                        data = Number(Math.round(data+'e2')+'e-2');
+                        data = data.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                     }
-                };
-            } else {
-                func = $.fn.dataTable.render.number( ',', '.', decimal_places, '$' );
-            }
+                    return "$" + data;
+                } else {
+                    return "";
+                }
+            };
             break;
         case "number":
             var decimal_places = params.decimal_places || 0;
-            func = $.fn.dataTable.render.number( ',', '.', decimal_places);
+            func = function(data, type, row) {
+                if (typeof data !== undefined && data !== null && data !== "N/A") {
+                    return Number(Math.round(data+'e'+decimal_places)+'e-'+decimal_places);
+                } else {
+                    return "";
+                }
+            };
             break;
     }
     return func;
@@ -210,21 +213,23 @@ function create_renders(columns) {
 const styles = theme => ({
   root: {
     width: '100%',
-    marginTop: theme.spacing.unit * 3,
+    marginTop: theme.spacing.unit,
     overflowX: 'auto',
   },
   table: {
     minWidth: 700,
   },
+  tableRow: {
+    height: 30,
+    '&:nth-of-type(odd)': {
+      backgroundColor: theme.palette.grey[700],
+    },
+  },
+  tableCell: {
+    paddingLeft: 10,
+    paddingRight: 10,
+  },
 });
-
-const sample_data = [
-	{"player_id": 1630, "player_first_name": "Tim", "player_last_name": "Hardaway", "season_year": 2014, "season_league": 0, "team_id": 63, "team_name": "New York Knicks", "team_abbrev": "NYK", "assists_AST": 0.8148, "blocks_BLK": 0.0864, "field_goal_attempts_FGA": 8.4815, "field_goals_FG": 3.6296, "free_throw_attempts_FTA": 1.5802, "free_throws_FT": 1.3086, "points_PTS": 10.1728, "rebounds_REB": 1.4938, "steals_STL": 0.5432, "three_point_attempts_3PA": 4.4198, "three_pointers_3P": 1.6049, "turnovers_TOV": 0.5802, "field_goal_percentage_FG%": 0.4279, "three_point_percentage_3P%": 0.3631, "free_throw_percentage_FT%": 0.8281}, 
-	{"player_id": 1630, "player_first_name": "Tim", "player_last_name": "Hardaway", "season_year": 2015, "season_league": 0, "team_id": 63, "team_name": "New York Knicks", "team_abbrev": "NYK", "assists_AST": 1.8143, "blocks_BLK": 0.2, "field_goal_attempts_FGA": 10.2429, "field_goals_FG": 3.9857, "free_throw_attempts_FTA": 2.2286, "free_throws_FT": 1.7857, "points_PTS": 11.4857, "rebounds_REB": 2.2286, "steals_STL": 0.2857, "three_point_attempts_3PA": 5.0571, "three_pointers_3P": 1.7286, "turnovers_TOV": 1.1714, "field_goal_percentage_FG%": 0.3891, "three_point_percentage_3P%": 0.3418, "free_throw_percentage_FT%": 0.8013}, 
-	{"player_id": 1630, "player_first_name": "Tim", "player_last_name": "Hardaway", "season_year": 2016, "season_league": 0, "team_id": 1, "team_name": "Atlanta Hawks", "team_abbrev": "ATL", "assists_AST": 0.9667, "blocks_BLK": 0.1333, "field_goal_attempts_FGA": 4.85, "field_goals_FG": 2.0167, "free_throw_attempts_FTA": 1.0333, "free_throws_FT": 0.9, "points_PTS": 5.7667, "rebounds_REB": 1.5833, "steals_STL": 0.35, "three_point_attempts_3PA": 2.6, "three_pointers_3P": 0.8333, "turnovers_TOV": 0.4333, "field_goal_percentage_FG%": 0.4158, "three_point_percentage_3P%": 0.3205, "free_throw_percentage_FT%": 0.871}, 
-	{"player_id": 1630, "player_first_name": "Tim", "player_last_name": "Hardaway", "season_year": 2017, "season_league": 0, "team_id": 1, "team_name": "Atlanta Hawks", "team_abbrev": "ATL", "assists_AST": 2.2235, "blocks_BLK": 0.1765, "field_goal_attempts_FGA": 11.6941, "field_goals_FG": 5.2, "free_throw_attempts_FTA": 2.7412, "free_throws_FT": 2.0706, "points_PTS": 14.3529, "rebounds_REB": 2.8235, "steals_STL": 0.6824, "three_point_attempts_3PA": 5.4, "three_pointers_3P": 1.8824, "turnovers_TOV": 1.3647, "field_goal_percentage_FG%": 0.4447, "three_point_percentage_3P%": 0.3486, "free_throw_percentage_FT%": 0.7554}
-];
-
 
 class FilterBox extends React.Component {
     state = {
@@ -252,7 +257,7 @@ class FilterBox extends React.Component {
 
     render() {
         const { filters, type } = this.props;
-        let filter_ids = filters.getOwnPropertyNames();
+        let filter_ids = Object.keys(filters);
         
         if (type === "url") {
             return (
@@ -350,8 +355,10 @@ class DataTable extends React.Component {
         super(props);
         const { paginated, filters } = props;
         let filterValues = {};
-        for (let f in filters.getOwnPropertyNames()) {
-            filterValues[f] = filters[f].default || "";
+        if (filters) {
+            for (let f in filters.getOwnPropertyNames()) {
+                filterValues[f] = filters[f].default || "";
+            }
         }
         this.state = {
             sortDir: 1,
@@ -362,14 +369,15 @@ class DataTable extends React.Component {
 
 	sortData = (event) => {
 		let value = event.target.getAttribute("id");
-		if (this.state.sortColumn == value) {
-			this.setState({sortDir: -this.state.sortDir});
+        let { filterValues, data, sortColumn, sortDir } = this.state;
+		if (sortColumn == value) {
+			this.setState({sortDir: -sortDir});
 		} else {
 			this.setState({sortDir: 1});
 		}
-        let data = (this.props.paginated) ? this.retrieveData() : this.state.tableData.sort(compare(value, this.state.sortDir));
+        data = (this.props.paginated) ? this.retrieveData(filterValues, compare(value, this.state.sortDir)) : data.sort(compare(value, this.state.sortDir));
         this.setState({
-            tableData: data,
+            data: data,
             sortColumn: value,
         });
   	};
@@ -389,7 +397,7 @@ class DataTable extends React.Component {
         let { filterValues, sortColumn, sortDir } = this.state;
         if (paginated) {
             data = getData(filterValues, compare(sortColumn, sortDir));
-        } else if (dataurl !== undefined) {
+        } else if (dataurl !== undefined && data === undefined) {
             let url = dataurl;
             for (let f in filterValues) {
                 url = url.replace("[=" + f + "=]", filterValues[f]);
@@ -398,43 +406,33 @@ class DataTable extends React.Component {
                 data = res.data;
             });
         }
-        ordering = ordering || data[0].getOwnPropertyNames();
-        this.setState({
-            sortColumn: ordering[0],
-            tableData: data,
-            ordering: ordering,
-        });
+        ordering = ordering || Object.keys(data[0]);
+        this.state.sortColumn = ordering[0];
+        this.state.data = data;
+        this.state.ordering = ordering;
     };
 
     getFilters = () => {
         const { filters, dataurl } = this.props;
-        let type = (dataurl === undefined) ? "all" : "url";
-        return <FilterBox filters={filters}/>;
+        if (filters) {
+            return <FilterBox filters={filters}/>;
+        }
+        return "";
     };
 
     getColumns = () => {
-        let { columns } = this.props;
-        let { tableData, ordering } = this.state;
-        let renders = {};
-        if (columns !== undefined) {
-            for (let c in columns) {
-                columns[c].label = columns[c].label || toTitleCase(columns[c].id);
-                visible = columns[c].visible;
-                if (visible === undefined || visible) {
-                    renders[c] = columns[c];
-                    if (ordering.indexOf(c)) {
-                        ordering.push(c);
-                    }
-                }
-            }
-        } else {
-            let visibleColumns = Object.getOwnPropertyNames(tableData[0]);
-            for (let value of visibleColumns) {
-                renders[value] = {label: toTitleCase(value)};
+        let { renders } = this.props;
+        let { data, ordering } = this.state;
+        let columns = {};
+        renders = renders || {};
+        ordering = ordering || Object.getOwnPropertyNames(data[0]);
+        for (let value of ordering) {
+            columns[value] = {label: toTitleCase(value)};
+            if (renders.hasOwnProperty(value)) {
+                columns[value].render = renders[value];
             }
         }
-        this.setState({ordering: ordering});
-        return create_renders(renders);
+        return create_renders(columns);
     };
 
 	render() {
@@ -448,14 +446,14 @@ class DataTable extends React.Component {
 				<Table className={classes.table}>
 					<TableHead>
 						<TableRow>
-							{ordering.map((value, index) => <TableCell onClick={this.sortData} key={value} id={value} numeric>{columns[value].label}</TableCell>)}
+							{ordering.map((value, index) => <TableCell className={classes.tableCell} onClick={this.sortData} key={value} id={value} numeric>{columns[value].label}</TableCell>)}
 						</TableRow>
 					</TableHead>
 					<TableBody>
 					  {data.map((row, index) => {
 					    return (
-					      <TableRow key={index}>
-					      	{ordering.map((value, index2) => <TableCell key={index} numeric>{(columns[value].hasOwnProperty("render") ? columns[value].render(row[value], "", row) : row[value])}</TableCell>)}
+					      <TableRow className={classes.tableRow} key={index}>
+					      	{ordering.map((value, index2) => <TableCell className={classes.tableCell} key={index2*index + index2} numeric>{(columns[value].hasOwnProperty("render") ? columns[value].render(row[value], "", row) : row[value])}</TableCell>)}
 					      </TableRow>
 					    );
 					  })}

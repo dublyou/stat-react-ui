@@ -8,7 +8,7 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import DataTable from './dataTable';
 import Paginate from './paginate';
-
+import axios from 'axios';
 
 const styles = theme => ({
   root: {
@@ -18,64 +18,57 @@ const styles = theme => ({
   },
 });
 
-const testTabs = [
-  {label: "Averages", type: "datatable", url: "http://statdive.com/stats/averages/player-season-team/player=1211/", args: {}},
-  {label: "Totals", type: "datatable", url: "http://statdive.com/stats/averages/player-season-team/player=1211/", args: {}},
-]
+class tabContent extends React.Component {
+
+}
 
 class ProfileTabs extends React.Component {
   state = {
     value: 0
-  }
+  };
 
-  tabContent = {}
+  tabContent = {};
 
-  handleChange(event, value) {
+  handleChange = (event, value) => {
     this.setState({ value });
-  }
+  };
 
   getTab(value) {
-    let tabContent = this.tabContent;
-    if (tabContent.hasOwnProperty(value)) {
-      return tabContent[value];
-    }
-
-    let tabs = this.props.tabs || testTabs;
-    let tabProps = tabs[value];
-    let data = [];
-    if (tabProps.url) {
-      axios.get(tabProps.url).then(res => {
-          data = res.data;
+    const { tabs } = this.props;
+    let { url, type, args } = tabs[value];
+    args = args || {};
+    let { data } = args;
+    if (url && data === undefined) {
+      axios.get(url).then(res => {
+          args.data = res.data;
       });
     }
-    switch(tabProps.type) {
+    switch(type) {
       case "datatable": {
-        const { paginate } = tabProps.args;
+        args.dataurl = url;
+        const { paginate } = args;
         if (paginate) {
-          const { per_page } = tabProps.args;
-          const datatable = (props) => { return <DataTable {...props}/>;};
-          tabContent[value] = <Paginate per_page={per_page} component={datatable} component_args={tabProps.args}/>
+          const { per_page } = args;
+          const datatable = (props) => { return <DataTable {...props}/>; };
+          return <Paper key={value}><Paginate per_page={per_page} component={datatable} component_args={args}/></Paper>;
+        } else {
+          return <Paper key={value}><DataTable {...args}/></Paper>;
         }
-        tabContent[value] = <DataTable data={data} {...tabProps.args}></DataTable>;
-        return tabContent[value];
       }
     }
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, tabs } = this.props;
     const { value } = this.state;
-    let { tabs } = this.props;
-    tabs = tabs || testTabs;
-    const tabList = tabs.map((value, index) => <Tab key={index} label={value.label} />);
-    let currentTab = this.getTab(value);
+    const tabList = tabs.map((tab, index) => <Tab key={index} label={tab.label}/>);
 
     return (
       <div className={classes.root}>
         <AppBar position="static" color="default">
           <Tabs
             value={value}
-            onChange={this.handleChange.bind(this)}
+            onChange={this.handleChange}
             indicatorColor="primary"
             textColor="primary"
             scrollable
@@ -84,9 +77,7 @@ class ProfileTabs extends React.Component {
             {tabList}
           </Tabs>
         </AppBar>
-        <Paper>
-        	{currentTab}
-        </Paper>
+        {this.getTab(value)}
       </div>
     );
   }
