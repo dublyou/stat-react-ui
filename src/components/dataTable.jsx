@@ -271,7 +271,7 @@ class FilterBox extends React.Component {
                             <FormControl>
                                 <InputLabel htmlFor={value}>{toTitleCase(value)}</InputLabel>
                                 <Select
-                                onChange={filterChange}
+                                onChange={handleChange}
                                 inputProps={{
                                   name: value,
                                   id: value,
