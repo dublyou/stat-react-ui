@@ -9,18 +9,17 @@ import sample_articles from '../sample_data/articles';
 const sample_data = sample_articles.articles;
 const styles = theme => ({
   root: {
-    width: '100%',
-  },
-  articles: {
-    maxHeight: 400,
-  },
+    margin: 5,
+    width: "100%",
+    height: "100%"
+  }
 });
 
 function articleList(props) {
   const { data } = props;
   return (
-  	<div style={{maxHeight: 550, overflowY: "scroll"}}>
-  		{data.map((row) => <Article {...row}/>)}
+  	<div>
+  		{data.map((row, key) => <Article key={key} {...row}/>)}
 	</div>
   );
 }
@@ -30,11 +29,11 @@ class Articles extends React.Component {
 		let { per_page, width, data } = this.props;
 		per_page = per_page || 5;
 		width = width || 400;
-		if (url === undefined) {
+		if (data === undefined) {
 			data = data || sample_data;
 		}
 		return (
-			<Paper>
+			<Paper className={classes.root}>
 				<Paginate component={articleList} {...{url, data, per_page, width}}/>
 			</Paper>
 		)

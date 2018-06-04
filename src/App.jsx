@@ -8,7 +8,7 @@ import GridPage from './pages/grid';
 import Navbar from './components/navbar';
 import logo from './logo.svg';
 import './App.css';
-import sample_args from './sample_data/draft';
+import sample_args from './sample_data/home';
 /*import { franchise_profile, team_profile, game_profile, player_profile, season_profile } from './sample_data';*/
 
 const rootEl = document.getElementById('root');

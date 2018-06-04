@@ -14,6 +14,18 @@ const styles = theme => ({
   label: {
   	color: theme.palette.text.secondary,
   	fontSize: theme.typography.pxToRem(12),
+  },
+  list: {
+  	paddingTop: 0,
+  	paddingBottom: 0,
+  },
+  li: {
+  	padding: 5,
+  },
+  subheader: {
+  	lineHeight: "30px",
+  	paddingLeft: 0,
+  	paddingRight: 0,
   }
 });
 
@@ -24,15 +36,30 @@ class SimpleList extends React.Component {
 		switch(type) {
 			case "sections":
 				let sections = Object.keys(items);
-				content = sections.map((s, i) => return (
-					<ListSubheader key={i}>{toTitleCase(s)}</ListSubheader>
-					{items[s].map((item, key) => <ListItem key={key} button component={component || "li"} {...item.props}><ListItemText primary={item.label} /></ListItem>)}
-				););
+				content = sections.map((s, i) => (
+					<ListItem key={i} className={classes.li}>
+						<List key={i} className={classes.list} subheader={<ListSubheader key={i} className={classes.subheader}>{toTitleCase(s)}</ListSubheader>}>
+							{items[s].map((item, key) => (
+								<ListItem key={`section-${i}-${key}`} className={classes.li} button component={component || "li"} {...item.props}>
+									<ListItemText primary={item.label} />
+								</ListItem>
+								)
+							)
+							}
+						</List>
+					</ListItem>
+				));
+				break;
 			default:
-				content = items.map((item, key) => <ListItem key={key} button component={component || "li"} {...item.props}><ListItemText primary={item.label} /></ListItem>);
+				content = items.map((item, key) => (
+					<ListItem key={key} className={classes.li} button component={component || "li"} {...item.props}>
+						<ListItemText primary={item.label} />
+					</ListItem>
+					)
+				);
 		}
 		return (
-			<List>
+			<List className={classes.list}>
 				{content}
 			</List>
 		);
