@@ -1,10 +1,8 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import DataTable from './dataTable';
 import Paginate from './paginate';
@@ -17,10 +15,6 @@ const styles = theme => ({
     backgroundColor: theme.palette.background.paper,
   },
 });
-
-class tabContent extends React.Component {
-
-}
 
 class ProfileTabs extends React.Component {
   state = {
@@ -55,6 +49,8 @@ class ProfileTabs extends React.Component {
           return <Paper key={value}><DataTable {...args}/></Paper>;
         }
       }
+      default:
+        return "";
     }
   }
 

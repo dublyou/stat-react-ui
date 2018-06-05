@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import ProfileHeader from '../components/profileHeader'
 import ProfileTabs from '../components/profileTabs'
 

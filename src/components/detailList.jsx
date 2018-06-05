@@ -1,12 +1,8 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
-import Divider from '@material-ui/core/Divider';
 
 function toTitleCase(str) {
     return str.replace(/_/g, " ").replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
@@ -49,7 +45,7 @@ class DetailList extends React.Component {
 				li_args["href"] = url;
 				li_args["component"] = "a";
 			}
-			list_batch.push(<ListItem key={i} className={classes.listitem}><span className={classes.label}>{toTitleCase(label)}:&nbsp;</span><ListItemText className={classes.info} {...li_args} primary={items[label].text}/></ListItem>);
+			list_batch.push(<ListItem key={i} className={classes.listitem}><span className={classes.label}>{toTitleCase(label)}:&nbsp;</span><ListItemText className={classes.info} {...li_args} primary={text}/></ListItem>);
 			i++;
 		}
 		if (list_batch.length > 0) {

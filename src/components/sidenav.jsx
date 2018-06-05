@@ -3,10 +3,6 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 
-const styles = theme => ({
-  
-});
-
 class SideNav extends React.Component {
   render() {
     const { classes, open, toggle, children } = this.props;
@@ -19,8 +15,4 @@ class SideNav extends React.Component {
   }
 }
 
-SideNav.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
-
-export default withStyles(styles)(SideNav);
+export default SideNav;

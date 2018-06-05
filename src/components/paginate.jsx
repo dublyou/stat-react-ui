@@ -1,11 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom'
-import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import classnames from 'classnames';
 import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import Typography from '@material-ui/core/Typography';
 import axios from 'axios';
 
 const styles = theme => ({
@@ -31,25 +26,6 @@ const styles = theme => ({
     flex: "0 1 auto",
     margin: "auto"
   }
-  /* width 
-::-webkit-scrollbar {
-    width: 10px;
-}
-
-/* Track 
-::-webkit-scrollbar-track {
-    background: #f1f1f1; 
-}
-
-/* Handle 
-::-webkit-scrollbar-thumb {
-    background: #888; 
-}
-
-/* Handle on hover 
-::-webkit-scrollbar-thumb:hover {
-    background: #555; 
-}*/
 });
 
 class PageButton extends React.Component {
@@ -65,7 +41,7 @@ class PageButton extends React.Component {
 class Paginate extends React.Component {
   constructor(props) {
     super(props);
-    let { data, url, per_page } = props;
+    let { data, url } = props;
     let filter_url = false;
     if (url !== undefined && data === undefined) {
       const url_regex = /\[=[\w\d\-]+=\]/;
@@ -123,7 +99,10 @@ class Paginate extends React.Component {
     let start = (value - 1) * per_page;
     let end = start + per_page;
     component_args = component_args || {};
-    component_args.data = data.slice(start, end);
+    if (data) {
+      component_args.data = data.slice(start, end);
+    }
+
     component_args.getData = this.getData.bind(this);
     component_args.paginated = true;
     return component(component_args);
@@ -132,7 +111,7 @@ class Paginate extends React.Component {
   getPageButtons(current_page, data) {
     const { per_page } = this.props;
     const pages = Math.ceil(data.length / per_page);
-    let page_buttons = [(current_page == 1) ? <Button key={1} color="primary">1</Button> : <PageButton key={1} color="secondary" value={1} updatePage={this.updatePage.bind(this)}/>];
+    let page_buttons = [(current_page === 1) ? <Button key={1} color="primary">1</Button> : <PageButton key={1} color="secondary" value={1} updatePage={this.updatePage.bind(this)}/>];
     const btns_displayed = 10;
     let start = 2;
     let end = pages - 1;
@@ -153,7 +132,7 @@ class Paginate extends React.Component {
       }
     }
     for (let p = start; p <= end; p++) {
-      if (p == current_page) {
+      if (p === current_page) {
         page_buttons.push(<Button key={p} color="primary">{p}</Button>);
       } else {
         page_buttons.push(<PageButton key={p} color="secondary" value={p} updatePage={this.updatePage.bind(this)}/>);
@@ -163,7 +142,7 @@ class Paginate extends React.Component {
     if (end > pages - 1) {
       page_buttons.push(<Button key="dummy-2">...</Button>);
     }
-    page_buttons.push((current_page == pages) ? <Button key="last_page_btn" color="primary">{pages}</Button> : <PageButton key="last_page_btn" color="secondary" value={pages} updatePage={this.updatePage.bind(this)}/>);
+    page_buttons.push((current_page === pages) ? <Button key="last_page_btn" color="primary">{pages}</Button> : <PageButton key="last_page_btn" color="secondary" value={pages} updatePage={this.updatePage.bind(this)}/>);
     /* add prev button if current page is greater than 1 */
     if (current_page > 1) {
       page_buttons.unshift(<PageButton key="prev_btn" color="primary" label="Prev" value={current_page - 1} updatePage={this.updatePage.bind(this)}/>);

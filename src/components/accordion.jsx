@@ -1,9 +1,6 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Expand from './expand';
-import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
 
 const styles = theme => ({
   root: {
@@ -26,7 +23,7 @@ class Accordion extends React.Component {
 		const { expanded } = this.state;
 
 		return (
-			<div>
+			<div className={classes.root}>
 				{expands.map((value, index) => <Expand key={index} expand={value} expanded={expanded === 'panel' + index} onChange={this.handleChange('panel' + index).bind(this)}/>)}
 			</div>
 		);

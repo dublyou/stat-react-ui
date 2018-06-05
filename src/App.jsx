@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import createMuiTheme from 'material-ui/styles/createMuiTheme';
 import Profile from './pages/profile';
-import Articles from './pages/articles';
 import SimplePage from './pages/simple';
 import GridPage from './pages/grid';
 import Navbar from './components/navbar';
@@ -36,8 +35,6 @@ class App extends Component {
     switch(page) {
       case "profile":
         return <Profile {...args}/>;
-      case "articles":
-        return <Articles {...args}/>;
       case "simple":
         return <SimplePage {...args}/>;
       case "grid":

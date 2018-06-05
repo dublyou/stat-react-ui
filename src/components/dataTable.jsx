@@ -1,6 +1,5 @@
 import React from 'react';
 import NumberFormat from 'react-number-format';
-import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Chip from '@material-ui/core/Chip';
@@ -58,12 +57,12 @@ function toTitleCase(str) {
 
 function get_sign(txt) {
     var return_val = "";
-    if (txt.substr(0, 1) == "g") {
+    if (txt.substr(0, 1) === "g") {
         return_val += ">";
-    } else if (txt.substr(0, 1) == "l") {
+    } else if (txt.substr(0, 1) === "l") {
         return_val += "<";
     }
-    if (txt.slice(-1) == "e") {
+    if (txt.slice(-1) === "e") {
         return_val += "=";
     }
     return return_val;
@@ -92,8 +91,9 @@ function toCurrency(x) {
 }
 
 function render_func(params) {
-    var type = params.type,
-        func;
+    let { type, decimal_places } = params;
+    var func;
+    decimal_places = decimal_places || 0;
     var parse_vars = function (string, data, type, row) {
         let regex = /{{\s*(?:data|type|row)(?:.(\w+))?\s*}}/g,
             matches = string.match(regex),
@@ -142,7 +142,6 @@ function render_func(params) {
             };
             break;
         case "percent":
-            var decimal_places = params.decimal_places || 0;
             func =  function ( data, type, row ) {
                 if (typeof data !== undefined && data !== null && data !== "N/A") {
                     return Number(Math.round(data+'e'+(decimal_places+2))+'e-' + decimal_places) + "%";
@@ -152,7 +151,6 @@ function render_func(params) {
             };
             break;
         case "currency":
-            var decimal_places = params.decimal_places || 0;
             func = function(data, type, row) {
                 if (typeof data !== undefined && data !== null && data !== "N/A") {
                     if (data < .01) {
@@ -170,7 +168,6 @@ function render_func(params) {
             };
             break;
         case "number":
-            var decimal_places = params.decimal_places || 0;
             func = function(data, type, row) {
                 if (typeof data !== undefined && data !== null && data !== "N/A") {
                     return Number(Math.round(data+'e'+decimal_places)+'e-'+decimal_places);
@@ -178,7 +175,6 @@ function render_func(params) {
                     return "";
                 }
             };
-            console.log(decimal_places);
             break;
         default:
             func = function(data, type, row) {
@@ -340,41 +336,47 @@ function compare(column, dir) {
 
 function filterData(row, id, operand, value) {
     let data = row[id];
-    switch (operand ) {
+    switch (operand) {
         case ">":
             return data > value;
         case "<":
             return data < value;
         case "=":
-            return data == value;
+            return data === value;
         case ">=":
             return data >= value;
         case "<=":
             return data <= value;
+        default:
+            return false;
     }
 }
 
 class DataTable extends React.Component {
     constructor(props) {
         super(props);
-        const { paginated, filters } = props;
+        const { filters } = props;
         let filterValues = {};
         if (filters) {
             for (let f in filters) {
                 filterValues[f] = filters[f].default || "";
             }
         }
+        const data = this.retrieveData(filterValues);
+        ordering = ordering || Object.keys(data[0]);
         this.state = {
             sortDir: 1,
-            filterValues: filterValues,
+            filterValues,
+            data,
+            ordering,
+            sortColumn: ordering[0],
         };
-        this.retrieveData();
     }
 
 	sortData = (event) => {
 		let value = event.target.getAttribute("id");
         let { filterValues, data, sortColumn, sortDir } = this.state;
-		if (sortColumn == value) {
+		if (sortColumn === value) {
 			this.setState({sortDir: -sortDir});
 		} else {
 			this.setState({sortDir: 1});
@@ -391,14 +393,14 @@ class DataTable extends React.Component {
         filters[id] = value;
         this.setState({
             filterValues: filters,
-            data: this.retrieveData(),
+            data: this.retrieveData(filters),
         });
     };
 
-    retrieveData = () => {
+    retrieveData = (filterValues) => {
         const { getData, dataurl, paginated } = this.props;
         let { data, ordering } = this.props;
-        let { filterValues, sortColumn, sortDir } = this.state;
+        let { sortColumn, sortDir } = this.state;
         if (paginated) {
             data = getData(filterValues, compare(sortColumn, sortDir));
         } else if (dataurl !== undefined && data === undefined) {
@@ -410,14 +412,11 @@ class DataTable extends React.Component {
                 data = res.data;
             });
         }
-        ordering = ordering || Object.keys(data[0]);
-        this.state.sortColumn = ordering[0];
-        this.state.data = data;
-        this.state.ordering = ordering;
+        return data;
     };
 
     getFilters = () => {
-        const { filters, dataurl } = this.props;
+        const { filters } = this.props;
         if (filters) {
             return <FilterBox filters={filters}/>;
         }
@@ -426,10 +425,9 @@ class DataTable extends React.Component {
 
     getColumns = () => {
         let { renders } = this.props;
-        let { data, ordering } = this.state;
+        let { ordering } = this.state;
         let columns = {};
         renders = renders || {};
-        ordering = ordering;
         for (let value of ordering) {
             columns[value] = {label: toTitleCase(value)};
             if (renders.hasOwnProperty(value)) {
@@ -440,7 +438,7 @@ class DataTable extends React.Component {
     };
 
 	render() {
-		const { classes, theme } = this.props;
+		const { classes } = this.props;
 		let columns = this.getColumns();
         let { data, ordering } = this.state;
 

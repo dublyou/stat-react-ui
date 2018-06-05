@@ -1,8 +1,6 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
 import DetailList from './detailList';
 import Accordion from './accordion';
 import Paper from '@material-ui/core/Paper';
@@ -39,11 +37,13 @@ function getHeaderContent(props) {
 	let subcontent = [];
 	type = type || "single";
 	switch(type) {
-		case "single":
+		case "cards":
+			content = cards.map((card, index) => <CustomCard index={index} {...card}/>);
+			break;
+		default:
 			if (heading) {
 				content.push(<Typography variant="headline">{heading}</Typography>);
 			}
-			let subcontent = [];
 			if (image) {
 				subcontent.push(<div className={classes.container}><img className={classes.image} src={image} alt={heading || "image"}/></div>);
 			}
@@ -54,10 +54,6 @@ function getHeaderContent(props) {
 				subcontent.push(<Accordion expands={accordion}/>);
 			}
 			content.push(<Card className={classes.card}>{subcontent}</Card>);
-			break;
-		case "cards":
-			content = cards.map((card, index) => <CustomCard index={index} {...card}/>);
-			break;
 	}
 	return content;
 }

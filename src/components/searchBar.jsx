@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import match from 'autosuggest-highlight/match';
 import parse from 'autosuggest-highlight/parse';
 import Avatar from '@material-ui/core/Avatar';
-import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
 import MenuItem from '@material-ui/core/MenuItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -71,23 +70,6 @@ const styles = theme => ({
   }
 });
 
-function renderInput(inputProps) {
-  const { classes, ref, ...other } = inputProps;
-
-  return (
-    <TextField
-      fullWidth
-      InputProps={{
-        inputRef: ref,
-        classes: {
-          input: classes.input,
-        },
-        ...other,
-      }}
-    />
-  );
-}
-
 function searchInput(props) {
   const { classes, ...other } = props;
   return (
@@ -136,13 +118,13 @@ function renderSuggestionsContainer(options) {
 }
 
 function getSuggestionValue(suggestion) {
+  console.log("works");
   return suggestion.name;
 }
 
 function getSuggestions(suggestions, value) {
   const inputValue = value.trim().toLowerCase();
   const inputLength = inputValue.length;
-  let count = 0;
 
   if (inputLength > 0) {
     return suggestions.filter(suggestion => {
@@ -165,7 +147,7 @@ class SearchBar extends React.Component {
     super(props);
     const { url, type } = props;
     let suggestions = [];
-    if (type == "load") {
+    if (type === "load") {
       axios.get(url).then(res => {
         suggestions = res;
       });
@@ -182,7 +164,7 @@ class SearchBar extends React.Component {
     const inputValue = value.trim().toLowerCase();
     const inputLength = inputValue.length;
     let { suggestions, originalSuggestions } = this.state;
-    if (type == "fetch") {
+    if (type === "fetch") {
       if (inputLength > 5) {
         suggestions = getSuggestions(originalSuggestions, inputValue);
       } else if (inputLength > 4) {
