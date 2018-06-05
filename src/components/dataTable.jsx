@@ -355,7 +355,7 @@ function filterData(row, id, operand, value) {
 class DataTable extends React.Component {
     constructor(props) {
         super(props);
-        const { filters, ordering } = props;
+        let { filters, ordering } = props;
         let filterValues = {};
         if (filters) {
             for (let f in filters) {

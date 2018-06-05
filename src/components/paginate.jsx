@@ -102,7 +102,6 @@ class Paginate extends React.Component {
     if (data !== undefined) {
       component_args.data = data.slice(start, end);
     }
-
     component_args.getData = this.getData.bind(this);
     component_args.paginated = true;
     return component(component_args);
