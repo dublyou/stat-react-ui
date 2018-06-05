@@ -99,7 +99,7 @@ class Paginate extends React.Component {
     let start = (value - 1) * per_page;
     let end = start + per_page;
     component_args = component_args || {};
-    if (data) {
+    if (data !== undefined) {
       component_args.data = data.slice(start, end);
     }
 
