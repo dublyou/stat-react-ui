@@ -20,6 +20,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import axios from 'axios';
+import sample_data from '../sample_data/team_roster';
 
 function NumberFormatCustom(props) {
   const { inputRef, onChange, ...other } = props;
@@ -352,6 +353,36 @@ function filterData(row, id, operand, value) {
     }
 }
 
+function getData(props, state, withState=false) {
+    let { data, ordering, url } = props;
+    let { sortColumn, sortDir, filterValues } = state;
+    for (let f in filterValues) {
+        url = url.replace("[=" + f + "=]", filterValues[f]);
+    }
+    if (url !== undefined) {
+        axios.get(url).then(res => {
+            return res.data;
+        }).catch(error => {
+            return state.data || data;
+        }).then(data => {
+            this.data = data || sample_data;
+        });
+    } else {
+        this.data = state.data || data;
+    }
+    if (withState) {
+        if (sortColumn === undefined) {
+            state.ordering = ordering || Object.keys(this.data[0]);
+            sortColumn = state.ordering[0];
+            state.sortColumn = sortColumn;
+
+        }
+        state.data = this.data.sort(compare(sortColumn, sortDir));
+        return state;
+    } 
+    return this.data.sort(compare(sortColumn, sortDir));
+}
+
 class DataTable extends React.Component {
     constructor(props) {
         super(props);
@@ -362,15 +393,16 @@ class DataTable extends React.Component {
                 filterValues[f] = filters[f].default || "";
             }
         }
-        const data = this.retrieveData(filterValues);
-        ordering = ordering || Object.keys(data[0]);
         this.state = {
             sortDir: 1,
             filterValues,
-            data,
-            ordering,
-            sortColumn: ordering[0],
-        };
+            ordering: ordering || [],
+            data: [],
+        }
+    }
+
+    componentWillMount() {
+        this.setState(this.getData(this.props, this.state, true));
     }
 
 	sortData = (event) => {
@@ -381,9 +413,8 @@ class DataTable extends React.Component {
 		} else {
 			this.setState({sortDir: 1});
 		}
-        data = (this.props.paginated) ? this.retrieveData(filterValues, compare(value, this.state.sortDir)) : data.sort(compare(value, this.state.sortDir));
         this.setState({
-            data: data,
+            data: getData(this.props, this.state),
             sortColumn: value,
         });
   	};
@@ -396,7 +427,7 @@ class DataTable extends React.Component {
             data: this.retrieveData(filters),
         });
     };
-
+    /* old method for pagination*/
     retrieveData = (filterValues) => {
         const { getData, dataurl, paginated } = this.props;
         let { data } = this.props;

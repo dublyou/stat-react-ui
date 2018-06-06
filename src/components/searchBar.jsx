@@ -9,6 +9,9 @@ import MenuItem from '@material-ui/core/MenuItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import { withStyles } from '@material-ui/core/styles';
 import axios from 'axios';
+import FuzzySet from 'fuzzyset.js';
+import sample_suggestions from '../sample_data/player_search';
+import sample_teams from '../sample_data/active_teams';
 
 const styles = theme => ({
   container: {
@@ -29,6 +32,8 @@ const styles = theme => ({
     margin: 0,
     padding: 0,
     listStyleType: 'none',
+    maxHeight: 300,
+    overflow: "auto"
   },
   input: {
     font: "inherit",
@@ -46,15 +51,18 @@ const styles = theme => ({
     }
   },
   searchContainer1: {
+    width: 175,
     height: 40,
     display: "flex",
     justifyContent: "space-between",
     boxShadow: "0px 1px 5px 0px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 3px 1px -2px rgba(0, 0, 0, 0.12)",
     borderRadius: 2,
+    outline: 0,
     backgroundColor: "#ddd",
     "&:hover": {
       backgroundColor: "#fff"
-    }
+    },
+    marginRight: 4
   },
   searchContainer2: {
     width: "100%",
@@ -71,9 +79,10 @@ const styles = theme => ({
 });
 
 function searchInput(props) {
-  const { classes, ...other } = props;
+  const { classes, container, ...other } = props;
+
   return (
-    <div className={classes.searchContainer1}>
+    <div className={classes.searchContainer1} ref={container}>
       <div className={classes.searchContainer2}>
         <div className={classes.searchContainer3}>
           <input className={classes.input} {...other} type="text"/>
@@ -93,11 +102,11 @@ function renderSuggestion(suggestion, { query, isHighlighted }) {
       <ListItemText>
         {parts.map((part, index) => {
           return part.highlight ? (
-            <span key={String(index)} style={{ fontWeight: 300 }}>
+            <span key={String(index)} style={{ fontWeight: 500 }}>
               {part.text}
             </span>
           ) : (
-            <strong key={String(index)} style={{ fontWeight: 500 }}>
+            <strong key={String(index)} style={{ fontWeight: 200 }}>
               {part.text}
             </strong>
           );
@@ -108,8 +117,8 @@ function renderSuggestion(suggestion, { query, isHighlighted }) {
 }
 
 function renderSuggestionsContainer(options) {
-  const { containerProps, children } = options;
-
+  let { containerProps, children } = options;
+  
   return (
     <Paper {...containerProps} square>
       {children}
@@ -118,21 +127,26 @@ function renderSuggestionsContainer(options) {
 }
 
 function getSuggestionValue(suggestion) {
-  console.log("works");
   return suggestion.name;
 }
 
-function getSuggestions(suggestions, value) {
-  const inputValue = value.trim().toLowerCase();
-  const inputLength = inputValue.length;
+function compare(a, b) {
+    if (a[0] < b[0])
+      return 1;
+    if (a[0] > b[0])
+      return -1;
+    return 0;
+}
 
-  if (inputLength > 0) {
+
+function getSuggestions(suggestions, value, threshold=.5) {
+  const a = FuzzySet(suggestions.map(value => value.name));
+  let results = a.get(value) || [];
+  results = results.sort(compare).slice(0, 5);
+  if (value.length > 0) {
     return suggestions.filter(suggestion => {
-      const suggestionParts = suggestion.name.split(" ");
-      suggestionParts.unshift(suggestion.name);
-      for (let part of suggestionParts) {
-        part = part.toLowerCase().slice(0, inputLength);
-        if (part === inputValue) {
+      for (let result of results) {
+        if (result[0] > threshold && suggestion.name === result[1]) {
           return true;
         }
       }
@@ -143,46 +157,80 @@ function getSuggestions(suggestions, value) {
 }
 
 class SearchBar extends React.Component {
+  state = {
+      value: '',
+      suggestions: [],
+      originalSuggestions: [],
+      type: "",
+  };
   constructor(props) {
-    super(props);
-    const { url, type } = props;
-    let suggestions = [];
-    if (type === "load") {
-      axios.get(url).then(res => {
-        suggestions = res;
-      });
-    }
-    this.state = {
+      super(props);
+      this.container = React.createRef();
+  }
+
+  componentDidUpdate() {
+    const { type } = this.props;
+    if (this.state.type !== type) {
+      this.setState({
+        type,
         value: '',
         suggestions: [],
-        originalSuggestions: suggestions,
-    };
+        originalSuggestions: [],
+      });
+    }
   }
 
   handleSuggestionsFetchRequested = ({ value }) => {
     const { url, type } = this.props;
     const inputValue = value.trim().toLowerCase();
-    const inputLength = inputValue.length;
+    const inputLength = value.length;
     let { suggestions, originalSuggestions } = this.state;
+
     if (type === "fetch") {
-      if (inputLength > 5) {
-        suggestions = getSuggestions(originalSuggestions, inputValue);
-      } else if (inputLength > 4) {
-        const dataurl = `${url}${inputValue}/`;
-        axios.get(dataurl).then(res => {
-          suggestions = res;
-        });
-        this.setState({
-          originalSuggestions: suggestions,
-        });
-      }
+        if (originalSuggestions.length === 0 && inputLength > 4) {
+            const dataurl = `${url}${inputValue}/`;
+            axios.get(dataurl).then(res => {
+              return res.data;
+            }).catch(error => {
+              return sample_suggestions;
+            }).then(data => {
+              this.setState({
+                originalSuggestions: data,
+              });
+            });
+        } else if (inputLength > 4) {
+            this.setState({
+              suggestions: getSuggestions(originalSuggestions, inputValue),
+            });
+        } else {
+            this.setState({
+                originalSuggestions: [],
+            });
+        }
     } else {
-      suggestions = getSuggestions(originalSuggestions, inputValue);
+        if (type === "load" && originalSuggestions.length === 0) {
+            axios.get(url).then(res => {
+              return res.data;
+            }).catch(error => {
+              return sample_teams;
+            }).then(data => {
+              this.setState({
+                originalSuggestions: data,
+              });
+            });
+            originalSuggestions = this.state.originalSuggestions;
+        }
+        if (inputLength > 4) {
+          this.setState({
+            suggestions: getSuggestions(originalSuggestions, inputValue, .3),
+          });
+        } else {
+          this.setState({
+            suggestions: originalSuggestions,
+          });
+        }
+        
     }
-    
-    this.setState({
-      suggestions: suggestions,
-    });
   };
 
   handleSuggestionsClearRequested = () => {
@@ -195,6 +243,18 @@ class SearchBar extends React.Component {
     this.setState({
       value: newValue,
     });
+  };
+
+  handleFocus = () => {
+    this.container.current.style.width = "250px";
+    this.container.current.style.outline = "2px solid #0099ff";
+    this.container.current.style.backgroundColor= "#fff";
+  };
+
+  handleBlur = () => {
+    this.container.current.style.width = "175px";
+    this.container.current.style.outline = "0";
+    this.container.current.style.backgroundColor= "#ddd";
   };
 
   render() {
@@ -217,9 +277,12 @@ class SearchBar extends React.Component {
         renderSuggestion={renderSuggestion}
         inputProps={{
           classes,
+          container: this.container,
           placeholder: `Search for ${label}...`,
           value: this.state.value,
           onChange: this.handleChange,
+          onFocus: this.handleFocus,
+          onBlur: this.handleBlur,
         }}
       />
     );

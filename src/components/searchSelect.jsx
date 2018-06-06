@@ -38,20 +38,25 @@ class SearchSelect extends React.Component {
     });
   };
 
+  getSearchBar = (value) => {
+    const { searches } = this.props;
+    return <SearchBar {...searches[value]}/>;
+  };
+
   render() {
     const { classes, searches } = this.props;
     
 
     return (
       <div className={classes.root}>
-        <SearchBar {...searches[this.state.value]}/>
+        {this.getSearchBar(this.state.value)}
         <Select
             value={this.state.value}
             onChange={this.handleChange}
             className={classes.container}
             classes={{root: classes.selectRoot}}
         >
-          {searches.map((value, i) => <MenuItem value={i}>{value.label}</MenuItem>)}
+          {searches.map((value, i) => <MenuItem key={i} value={i}>{value.label}</MenuItem>)}
         </Select>
       </div>
     );

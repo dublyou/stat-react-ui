@@ -41,24 +41,35 @@ class PageButton extends React.Component {
 class Paginate extends React.Component {
   constructor(props) {
     super(props);
-    let { data, url } = props;
-    let filter_url = false;
-    if (url !== undefined && data === undefined) {
-      const url_regex = /\[=[\w\d\-]+=\]/;
+    this.content = React.createRef();
+  }
+  state = {
+    page: 1,
+    data: [],
+    filter_url: false,
+  }
+
+  componentWillMount() {
+    let { data, url } = this.props;
+    if (url !== undefined) {
+      const url_regex = /\[=[\w\d-]+=\]/;
       if (url_regex.test(url)) {
-        data = [];
-        filter_url = true;
+        this.setState({
+          filter_url: true
+        });
       } else {
         axios.get(url).then(res => {
-            data = res.data;
+            return res.data;
+        }).catch(error => {
+          if (data !== undefined) {
+            return data;
+          }
+          return [];
+        }).then(data => {
+            this.setState({data: data});
         });
       }
     }
-    this.state = {
-      data: data,
-      page: 1,
-      filter_url: filter_url,
-    };
   }
 
   getData(filters, sort) {
@@ -89,9 +100,7 @@ class Paginate extends React.Component {
     this.setState({
       page: value,
     });
-    const content = document.querySelector('.Paginate-content-268');
-    content.scrollTop = 0;
-
+    this.content.current.scrollTop = 0;
   }
 
   getPageContent(value, data) {
@@ -158,7 +167,7 @@ class Paginate extends React.Component {
     let { page, data } = this.state;
     return (
       <div className={classes.root}>
-        <div key="paginated-content" className={classes.content}>{this.getPageContent(page, data)}</div>
+        <div key="paginated-content" className={classes.content} ref={this.content}>{this.getPageContent(page, data)}</div>
         <div key="paginated-buttons" className={classes.buttons}>{this.getPageButtons(page, data)}</div>
       </div>
     );

@@ -29,25 +29,12 @@ class ProfileTabs extends React.Component {
 
   getTab(value) {
     const { tabs } = this.props;
-    let { url, type, args } = tabs[value];
+    let { type, args } = tabs[value];
     args = args || {};
-    let { data } = args;
-    if (url && data === undefined) {
-      axios.get(url).then(res => {
-          args.data = res.data;
-      });
-    }
+    
     switch(type) {
       case "datatable": {
-        args.dataurl = url;
-        const { paginate } = args;
-        if (paginate) {
-          const { per_page } = args;
-          const datatable = (props) => { return <DataTable {...props}/>; };
-          return <Paper key={value}><Paginate per_page={per_page} component={datatable} component_args={args}/></Paper>;
-        } else {
-          return <Paper key={value}><DataTable {...args}/></Paper>;
-        }
+        return <Paper key={value}><DataTable {...args}/></Paper>;
       }
       default:
         return "";
