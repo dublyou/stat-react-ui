@@ -384,39 +384,67 @@ function getData(props, state, withState=false) {
 }
 
 class DataTable extends React.Component {
-    constructor(props) {
-        super(props);
-        let { filters, ordering } = props;
+    state = {
+        sortDir: 1,
+        ordering: [],
+        data: [],
+    }
+
+    componentWillMount() {
+        let { filters } = this.props;
         let filterValues = {};
         if (filters) {
             for (let f in filters) {
                 filterValues[f] = filters[f].default || "";
             }
         }
-        this.state = {
-            sortDir: 1,
-            filterValues,
-            ordering: ordering || [],
-            data: [],
+        this.setState({filterValues});
+        this.getData();
+    }
+
+    getData = () => {
+        let { data, ordering, url } = this.props;
+        let { sortColumn, sortDir, filterValues } = this.state;
+        let state_data = this.state.data;
+        for (let f in filterValues) {
+            url = url.replace("[=" + f + "=]", filterValues[f]);
         }
-    }
+        if (url !== undefined) {
+            axios.get(url).then(res => {
+                return res.data;
+            }).catch(error => {
+                return (state_data.length > 0) ? state_data : data;
+            }).then(data => {
+                this.sortData(data, sortDir, sortColumn);
+            });
+        } else {
+            let state_data = this.state.data;
+            data = (state_data.length > 0) ? state_data : data;
+            this.sortData(data, sortDir, sortColumn);
+        }
+    };
 
-    componentWillMount() {
-        this.setState(this.getData(this.props, this.state, true));
-    }
-
-	sortData = (event) => {
-		let value = event.target.getAttribute("id");
-        let { filterValues, data, sortColumn, sortDir } = this.state;
-		if (sortColumn === value) {
-			this.setState({sortDir: -sortDir});
-		} else {
-			this.setState({sortDir: 1});
-		}
+    sortData = (data, sortDir, sortColumn) => {
+        if (sortColumn === undefined) {
+            let { ordering } = this.props;
+            ordering = ordering || Object.keys(data[0]);
+            sortColumn = ordering[0];
+            sortDir = sortDir || 1;
+            this.setState({ordering});
+        }
         this.setState({
-            data: getData(this.props, this.state),
-            sortColumn: value,
+            data: data.sort(compare(sortColumn, sortDir)),
+            sortDir,
+            sortColumn,
         });
+    };
+
+	handleSort = (event) => {
+		let value = event.target.getAttribute("id");
+        let { sortColumn, sortDir, data } = this.state;
+        sortDir = ((sortColumn === value) ? -sortDir : 1);
+        console.log(sortDir);
+        this.sortData(data, sortDir, value);
   	};
 
     filterChange = (id, value) => {
@@ -479,7 +507,7 @@ class DataTable extends React.Component {
 				<Table className={classes.table}>
 					<TableHead>
 						<TableRow>
-							{ordering.map((value, index) => <TableCell className={classes.tableCell} onClick={this.sortData} key={value} id={value} numeric>{columns[value].label}</TableCell>)}
+							{ordering.map((value, index) => <TableCell className={classes.tableCell} onClick={this.handleSort} key={value} id={value} numeric>{columns[value].label}</TableCell>)}
 						</TableRow>
 					</TableHead>
 					<TableBody>

@@ -29,12 +29,12 @@ class ProfileTabs extends React.Component {
 
   getTab(value) {
     const { tabs } = this.props;
-    let { type, args } = tabs[value];
+    let { type, url, args } = tabs[value];
     args = args || {};
     
     switch(type) {
       case "datatable": {
-        return <Paper key={value}><DataTable {...args}/></Paper>;
+        return <Paper key={value}><DataTable url={url} {...args}/></Paper>;
       }
       default:
         return "";
