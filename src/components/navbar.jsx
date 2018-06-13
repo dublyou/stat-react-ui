@@ -17,8 +17,12 @@ const styles = {
   root: {
     flexGrow: 1,
   },
-  flex: {
+  container: {
     flex: 1,
+  },
+  title: {
+    textDecoration: "none",
+    display: "inline-block",
   },
   menuButton: {
     marginLeft: -12,
@@ -71,9 +75,11 @@ class NavBar extends React.Component {
           <IconButton onClick={this.toggleDrawer().bind(this)} className={classes.menuButton} color="inherit" aria-label="Menu">
             <MenuIcon />
           </IconButton>
-          <Typography variant="title" color="inherit" className={classes.flex}>
-            {title || "Statdive"}
-          </Typography>
+          <div className={classes.container}>
+            <Typography component="a" href="/" variant="title" color="inherit" className={classes.title}>
+              {title || "Statdive"}
+            </Typography>
+          </div>
           {searchBar}
         </Toolbar>
         <SideNav toggle={this.toggleDrawer(false).bind(this)} open={this.state.left}>

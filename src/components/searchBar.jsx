@@ -157,15 +157,16 @@ function getSuggestions(suggestions, value, threshold=.5) {
 }
 
 class SearchBar extends React.Component {
-  state = {
-      value: '',
-      suggestions: [],
-      originalSuggestions: [],
-      type: "",
-  };
   constructor(props) {
       super(props);
       this.container = React.createRef();
+      const { type } = this.props;
+      this.state = {
+        value: '',
+        suggestions: [],
+        originalSuggestions: [],
+        type,
+    };
   }
 
   componentDidUpdate() {
@@ -259,6 +260,7 @@ class SearchBar extends React.Component {
 
   render() {
     const { classes, label } = this.props;
+    console.log(this.state.value);
 
     return (
       <Autosuggest

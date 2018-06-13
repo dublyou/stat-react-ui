@@ -2,6 +2,7 @@ import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Paginate from '../components/paginate';
+import LoadMore from '../components/loadMore';
 import Article from '../components/article';
 import sample_articles from '../sample_data/news_data';
 
@@ -30,7 +31,7 @@ class Articles extends React.Component {
 		data = data || sample_articles;
 		return (
 			<Paper className={classes.root}>
-				<Paginate component={articleList} {...{url, data, per_page, width}}/>
+				<LoadMore component={articleList} {...{url, data, per_page, width}}/>
 			</Paper>
 		)
 	}

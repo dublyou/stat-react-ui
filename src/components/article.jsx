@@ -21,6 +21,10 @@ const styles = theme => ({
   actions: {
     display: 'flex',
   },
+  source: {
+    color: "#fff",
+    flex: 1,
+  }
 });
 
 class Article extends React.Component {
@@ -28,7 +32,8 @@ class Article extends React.Component {
   render() {
     const { classes, url, source, publish_date, title, image_url, description, summary, width } = this.props;
     const MyLink = props => <a target="_blank" href={url} {...props}>{props.children}</a>;
-    const card_size = {width: width || "100%"}
+    const card_size = {width: width || "100%", borderBottom: "1px solid #fff"}
+    const image = (image_url !== null) ? <CardMedia className={classes.media} image={image_url} title={image_url}/> : "";
 
     return (
       <div>
@@ -42,16 +47,12 @@ class Article extends React.Component {
             title={title}
             subheader={publish_date}
           />
-          <CardMedia
-            className={classes.media}
-            image={image_url}
-            title={title}
-          />
+          {image}
           <CardContent>
             <Typography component="p">{description || summary}</Typography>
           </CardContent>
           <CardActions className={classes.actions} disableActionSpacing>
-            <Typography target="_blank" to={source} component={MyLink} >{source}</Typography>
+            <a className={classes.source} target="_blank" href={`http://${source}`}>{source}</a>
             <Button component={MyLink}>Go&nbsp;to&nbsp;article</Button>
           </CardActions>
         </Card>

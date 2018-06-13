@@ -4,7 +4,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Paper from '@material-ui/core/Paper';
-import DataTable from './dataTable';
+import DataTable from './dataTablePaginate';
 import Paginate from './paginate';
 import axios from 'axios';
 
@@ -14,6 +14,9 @@ const styles = theme => ({
     width: '100%',
     backgroundColor: theme.palette.background.paper,
   },
+  tabContent: {
+    marginBottom: 10,
+  }
 });
 
 class ProfileTabs extends React.Component {
@@ -28,13 +31,13 @@ class ProfileTabs extends React.Component {
   };
 
   getTab(value) {
-    const { tabs } = this.props;
+    const { classes, tabs } = this.props;
     let { type, url, args } = tabs[value];
     args = args || {};
     
     switch(type) {
       case "datatable": {
-        return <Paper key={value}><DataTable url={url} {...args}/></Paper>;
+        return <Paper className={classes.tabContent} key={value}><DataTable url={url} {...args}/></Paper>;
       }
       default:
         return "";

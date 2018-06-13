@@ -5,6 +5,7 @@ import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Typography from '@material-ui/core/Typography';
+import SimpleList from './simpleList';
 
 const styles = theme => ({
   heading: {
@@ -13,15 +14,24 @@ const styles = theme => ({
   },
 });
 
+function getContent(props) {
+  const { type, args } = props;
+  switch(type) {
+  	case "list":
+  		return <SimpleList {...args}/>;
+  	default:
+  		return <p>Error: Item type does not exist</p>
+  }
+}
+
 class Expand extends React.Component {
 	render() {
-		const { classes, expand } = this.props;
-		const { label, content } = expand;
-
+		const { classes, title, ...other } = this.props;
+		const content = getContent(other);
 		return (
           	<ExpansionPanel {...this.props}>
 		        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-		          <Typography className={classes.heading}>{label}</Typography>
+		          <Typography className={classes.heading}>{title}</Typography>
 		        </ExpansionPanelSummary>
 		        <ExpansionPanelDetails>
 		          {content}
