@@ -30,8 +30,8 @@ const getCombos = (group_by, groups, combos=[], count=0) => {
             return obj;
         });
     } else {
-        for (value of groups[label]) {
-            for (combo of combos) {
+        for (let value of groups[label]) {
+            for (let combo of combos) {
                 combo[label] = value;
                 newCombos.push(combo);
             }
@@ -409,7 +409,7 @@ class DataTable extends React.Component {
                 let { dir } = params;
                 func = (value, row, data) => {
                     value = value || row[column];
-                    column_data = data.map(r => r[column]).sort(compare_values);
+                    let column_data = data.map(r => r[column]).sort(compare_values);
                     if (dir == -1) {
                         column_data = column_data.reverse()
                     }
@@ -423,7 +423,7 @@ class DataTable extends React.Component {
                 break;
             case "forcediff":
                 func = (value, row, data) => {
-                    column_data = data.map(r => r[column]).sort(compare_values);
+                    let column_data = data.map(r => r[column]).sort(compare_values);
                     return value - column_data[0];
                 };
                 break;
