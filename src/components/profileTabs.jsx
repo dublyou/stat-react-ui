@@ -4,7 +4,8 @@ import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Paper from '@material-ui/core/Paper';
-import DataTable from './dataTablePaginate';
+import DataTable from './dataTable';
+import GridItems from './gridItems';
 import Paginate from './paginate';
 import axios from 'axios';
 
@@ -38,6 +39,9 @@ class ProfileTabs extends React.Component {
     switch(type) {
       case "datatable": {
         return <Paper className={classes.tabContent} key={value}><DataTable url={url} {...args}/></Paper>;
+      }
+      case "griditems": {
+        return <Paper className={classes.tabContent} key={value}><GridItems grid_items={args}/></Paper>;
       }
       default:
         return "";

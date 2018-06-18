@@ -260,8 +260,6 @@ class SearchBar extends React.Component {
 
   render() {
     const { classes, label } = this.props;
-    console.log(this.state.value);
-
     return (
       <Autosuggest
         theme={{

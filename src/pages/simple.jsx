@@ -4,7 +4,7 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import DataTable from '../components/dataTable';
 import Paginate from '../components/paginate';
-import axios from 'axios';
+import ProfileHeader from '../components/profileHeader'
 
 const styles = theme => ({
   root: {
@@ -18,33 +18,23 @@ class SimplePage extends React.Component {
   getContent(props) {
     const { url, type, args } = props;
     let { data } = props;
-    if (url) {
-      axios.get(url).then(res => {
-          data = res.data;
-      });
-    }
     switch(type) {
       case "datatable": {
-        const { paginate } = args;
-        if (paginate) {
-          const { per_page } = args;
-          const datatable = (props) => { return <DataTable {...props}/>;};
-          return <Paginate per_page={per_page} component={datatable} component_args={args}/>;
-        }
-        return <DataTable data={data} {...args}></DataTable>;
+        return <DataTable url={url} data={data} {...args}></DataTable>;
       }
       default: 
-        return "";
+        return null;
     }
   }
 
   render() {
-    const { classes, heading } = this.props;
+    const { classes, heading, header } = this.props;
     let content = this.getContent(this.props);
+    let head = (header === undefined) ? <Typography variant="headline">{heading}</Typography> : <ProfileHeader {...header}></ProfileHeader>;
 
     return (
       <div className={classes.root}>
-        <Typography variant="headline">{heading}</Typography>
+        {head}
         <Paper>
         	{content}
         </Paper>

@@ -1,11 +1,17 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
+import Avatar from '@material-ui/core/Avatar';
 import Card from '@material-ui/core/Card';
+import CardHeader from '@material-ui/core/CardHeader';
+import CardMedia from '@material-ui/core/CardMedia';
+import CardContent from '@material-ui/core/CardContent';
+import Hidden from '@material-ui/core/Hidden';
 import DetailList from './detailList';
 import Accordion from './accordion';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import CustomCard from './customCard';
+import SimpleList from './simpleList';
 
 const styles = theme => ({
   root: {
@@ -14,21 +20,30 @@ const styles = theme => ({
   },
   card: {
     display: 'flex',
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
+    alignItems: 'center',
   },
   details: {
     display: 'flex',
     flexWrap: 'wrap'
   },
   image: {
-   	height: "auto",
-   	minWidth: 100,
-   	width: "100%"
+  	width: "6rem",
+   	height: "6rem",
   },
-  container: {
-  	maxWidth: 150,
-  	width: "100%"
+  cover: {
+    width: "4rem",
+    height: "4rem",
   },
+  content: {
+  	padding: 10,
+  	"&:last-child": {
+  		paddingBottom: 16
+  	}
+  },
+  detailItem: {
+  	textAlign: "right",
+  }
 });
 
 function getHeaderContent(props) {
@@ -41,16 +56,29 @@ function getHeaderContent(props) {
 			content = cards.map((card, index) => <CustomCard index={index} {...card}/>);
 			break;
 		default:
-			if (heading) {
+			if (heading !== undefined && heading !== null) {
 				content.push(<Typography variant="headline">{heading}</Typography>);
 			}
-			if (image) {
-				subcontent.push(<div className={classes.container}><img className={classes.image} src={image} alt={heading || "image"}/></div>);
+			if (cards !== undefined && cards !== null) {
+				content = content.concat(cards.map((card, index) => <CustomCard index={index} {...card}/>));
 			}
-			if (details) {
-				subcontent.push(<DetailList key={2} items={details}/>);
+			if (image !== undefined && image !== null) {
+				subcontent.push(<CardMedia className={classes.image} image={image} title={heading || "image"}/>);
 			}
-			if (accordion) {
+			if (details !== undefined && details !== null) {
+				let labels = Object.keys(details);
+				const increment = 5;
+				let count = Math.ceil(labels.length / increment)
+				for (let i = 0; i < count; i++) {
+					let items = labels.slice(i * increment, (i + 1) * increment).map(value => {
+						let item = details[value];
+						item["label"] = value;
+						return item;
+					});
+					subcontent.push(<SimpleList key={i} items={items} styles={classes.detailItem} dense={true}/>);
+				}
+			}
+			if (accordion !== undefined && accordion !== null) {
 				subcontent.push(<Accordion expands={accordion}/>);
 			}
 			content.push(<Card className={classes.card}>{subcontent}</Card>);

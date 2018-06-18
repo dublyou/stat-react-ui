@@ -2,10 +2,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
+import Divider from '@material-ui/core/Divider';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
+import Hidden from '@material-ui/core/Hidden';
 import MenuIcon from '@material-ui/icons/Menu';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import SimpleMenu from './menu';
 import SideNav from './sidenav';
 import SearchBar from './searchBar';
@@ -23,14 +26,22 @@ const styles = {
   title: {
     textDecoration: "none",
     display: "inline-block",
+    color: "#fff",
   },
   menuButton: {
     marginLeft: -12,
     marginRight: 20,
   },
   list: {
-    width: 250,
+    minWidth: 250,
   },
+  drawerHeader: {
+    display: "flex",
+    alignItems: "center",
+  },
+  listItems: {
+    fontSize: 20,
+  }
 };
 
 class NavBar extends React.Component {
@@ -80,12 +91,26 @@ class NavBar extends React.Component {
               {title || "Statdive"}
             </Typography>
           </div>
-          {searchBar}
+          <Hidden xsDown>{searchBar}</Hidden>
         </Toolbar>
         <SideNav toggle={this.toggleDrawer(false).bind(this)} open={this.state.left}>
-          <div className={classes.list}>
-            <SimpleList component="a" items={side_nav}/>
+          <div className={classes.drawerHeader}>
+            <div className={classes.container} style={{marginLeft: 10}}>
+              <Typography component="a" href="/" variant="title" color="inherit" className={classes.title}>
+                {title || "Statdive"}
+              </Typography>
+              </div>
+            <IconButton onClick={this.toggleDrawer(false)}>
+              <ChevronLeftIcon />
+            </IconButton>
           </div>
+          <Divider />
+          {searchBar}
+          <Divider />
+          <div className={classes.list}>
+            <SimpleList component="a" styles={classes.listItems} items={side_nav}/>
+          </div>
+          <Divider />
         </SideNav>
       </AppBar>
     );
