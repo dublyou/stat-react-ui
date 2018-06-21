@@ -302,6 +302,7 @@ class DataTable extends React.Component {
                 this.widthContainers.push(React.createRef());
             }
         }
+        console.log(sortColumn);
         sortColumn = sortColumn || ordering[0];
         sortDir = sortDir || 1;
         this.setState({
