@@ -9,17 +9,19 @@ import SimpleList from '../components/simpleList';
 
 const styles = theme => ({
   root: {
-  	margin: 5,
+  	margin: ".5rem",
+    backgroundColor: theme.palette.background.default,
   },
   cardHeader: {
-    borderBottom: "1px solid #fff"
+    borderBottom: "1px solid #fff",
+    backgroundColor: theme.palette.grey[900],
   },
   headerRoot: {
   	padding: 5,
   	textAlign: "center",
   },
   headerTitle: {
-    fontSize: 16,
+    fontSize: "1rem",
   },
   cardContent: {
   	padding: 5,

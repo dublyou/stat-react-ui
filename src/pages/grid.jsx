@@ -4,12 +4,13 @@ import Articles from '../components/articles';
 import Headlines from '../components/headlines';
 import CardList from '../components/cardList';
 import Grid from '@material-ui/core/Grid';
+import Hidden from '@material-ui/core/Hidden';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 
 const styles = theme => ({
   root: {
-    width: '100%',
+    
   },
   gridItem: {
   	
@@ -35,12 +36,18 @@ function getItem(props) {
 class GridPage extends React.Component {
 	render() {
 		const { classes, grid_items, heading } = this.props;
-		let gridItems = grid_items.map((item, key) => <Grid key={key} className={classes.gridItem} item {...item.sizes}>{getItem(item)}</Grid>);
+		let gridItems = grid_items.map((item, key) => {
+      let gridItem = getItem(item);
+      if (item.sizes.xs === undefined) {
+        gridItem = <Hidden xsDown>{gridItem}</Hidden>;
+      }
+      return <Grid key={key} className={classes.gridItem} {...item.sizes}>{gridItem}</Grid>;
+    });
     const h1 = (heading === undefined) ? null : <Paper className={classes.heading}><Typography variant="headline">{heading}</Typography></Paper>;
 		return (
       <div>
         {h1}
-  			<Grid container spacing={8} className={classes.root}>
+  			<Grid container justify="center" spacing={8} className={classes.root}>
   		      {gridItems}
   		  </Grid>
       </div>

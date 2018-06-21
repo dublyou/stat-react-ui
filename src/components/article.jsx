@@ -11,8 +11,8 @@ import Typography from '@material-ui/core/Typography';
 import OpenInNew from '@material-ui/icons/OpenInNew';
 
 const styles = theme => ({
-  card: {
-    maxWidth: 800,
+  root: {
+    backgroundColor: theme.palette.background.default,
   },
   media: {
     height: 0,
@@ -36,8 +36,7 @@ class Article extends React.Component {
     const image = (image_url !== null) ? <CardMedia className={classes.media} image={image_url} title={image_url}/> : "";
 
     return (
-      <div>
-        <Card style={card_size}>
+        <Card className={classes.root} style={card_size}>
           <CardHeader
             action={
               <IconButton component={MyLink}>
@@ -56,7 +55,6 @@ class Article extends React.Component {
             <Button component={MyLink}>Go&nbsp;to&nbsp;article</Button>
           </CardActions>
         </Card>
-      </div>
     );
   }
 }

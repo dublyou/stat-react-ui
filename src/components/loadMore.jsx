@@ -9,7 +9,6 @@ const styles = theme => ({
     flexFlow: "column",
   },
   content: {
-    margin: "auto",
     overflowY: 'auto',
     flex: "1 1 auto",
     "&::-webkit-scrollbar": {

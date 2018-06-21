@@ -8,9 +8,7 @@ import sample_articles from '../sample_data/news_data';
 
 const styles = theme => ({
   root: {
-    margin: 5,
-    width: "100%",
-    height: "100%"
+  	margin: ".5rem"
   }
 });
 

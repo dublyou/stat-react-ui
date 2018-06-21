@@ -6,9 +6,7 @@ import sample_articles from '../sample_data/news_data';
 
 
 const styles = theme => ({
-  root: {
-    maxWidth: 800,
-  }
+  
 });
 
 class Headlines extends React.Component {
@@ -31,7 +29,7 @@ class Headlines extends React.Component {
   render() {
     const { classes, count } = this.props;
     const { data } = this.state;
-    let items = data.slice(0, count || 10).map((value) => ({label: value.title, props: {href: value.url, target: "_blank", title: value.description}}));
+    let items = data.slice(0, count || 10).map((value) => ({label: "::", primary: value.title, props: {href: value.url, target: "_blank", title: value.description}}));
 
     return (
       <CardList title="Headlines" component="a" items={items}/>

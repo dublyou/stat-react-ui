@@ -12,6 +12,9 @@ const styles = theme => ({
     width: '100%',
     backgroundColor: theme.palette.background.paper,
   },
+  heading: {
+    paddingLeft: "1.6rem",
+  }
 });
 
 class SimplePage extends React.Component {
@@ -30,7 +33,7 @@ class SimplePage extends React.Component {
   render() {
     const { classes, heading, header } = this.props;
     let content = this.getContent(this.props);
-    let head = (header === undefined) ? <Typography variant="headline">{heading}</Typography> : <ProfileHeader {...header}></ProfileHeader>;
+    let head = (header === undefined) ? <Typography className={classes.heading} variant="headline">{heading}</Typography> : <ProfileHeader {...header}></ProfileHeader>;
 
     return (
       <div className={classes.root}>

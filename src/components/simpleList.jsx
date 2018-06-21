@@ -20,7 +20,7 @@ const styles = theme => ({
   	paddingBottom: 0,
   },
   li: {
-  	padding: 5,
+  	padding: ".5rem",
   	minWidth: "15rem",
   },
   subheader: {
@@ -63,7 +63,7 @@ class SimpleList extends React.Component {
 						<ListItem key={key} className={classes.li} button component={item.component || component || "li"} {...item.props}>
 							{image}
 							{label}
-							<ListItemText classes={li_styles} primary={item.primary || item.label} secondary={item.secondary}/>
+							<ListItemText classes={li_styles} primary={item.primary || item.label} secondary={item.secondary} inset={item.inset}/>
 						</ListItem>
 					);
 				});
