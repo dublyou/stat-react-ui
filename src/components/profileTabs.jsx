@@ -6,8 +6,6 @@ import Tab from '@material-ui/core/Tab';
 import Paper from '@material-ui/core/Paper';
 import DataTable from './dataTable';
 import GridItems from './gridItems';
-import Paginate from './paginate';
-import axios from 'axios';
 
 const styles = theme => ({
   root: {

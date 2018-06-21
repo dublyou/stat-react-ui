@@ -8,7 +8,7 @@ import GridPage from './pages/grid';
 import Navbar from './components/navbar';
 import logo from './logo.svg';
 import './App.css';
-import sample_args from './sample_data/home';
+import sample_args from './sample_data/draft';
 /*draft, franchise_profile, game_profile, player_profile, season_profile, team_profile, standings, stats, 
 season_stat_leaders, alltime_stat_leaders, stat_rankings, season_stat_rankings, franchise_stat_rankings, home, 
 */

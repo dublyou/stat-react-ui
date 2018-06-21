@@ -359,7 +359,7 @@ class DataTable extends React.Component {
         this.setState({
             filterValues: filterValues,
         });
-        if (filters[value].type === "url") {
+        if (filters[id].type === "url") {
             this.getData(filterValues);
         }
     };
