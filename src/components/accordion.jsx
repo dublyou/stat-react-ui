@@ -4,7 +4,6 @@ import Expand from './expand';
 
 const styles = theme => ({
   root: {
-  	padding: 5,
   },
 });
 
@@ -24,7 +23,7 @@ class Accordion extends React.Component {
 
 		return (
 			<div className={classes.root}>
-				{expands.map((value, index) => <Expand key={index} expand={value} expanded={expanded === 'panel' + index} onChange={this.handleChange('panel' + index).bind(this)}/>)}
+				{expands.map((value, index) => <Expand key={'panel' + index} expand={value} expanded={expanded === 'panel' + index} onChange={this.handleChange('panel' + index).bind(this)}/>)}
 			</div>
 		);
 	}

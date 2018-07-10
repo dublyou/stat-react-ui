@@ -1,6 +1,7 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Paper from '@material-ui/core/Paper';
 import Switch from '@material-ui/core/Switch';
@@ -187,11 +188,18 @@ const styles = theme => ({
     condenseBtn: {
         position: "absolute",
         right: 0,
+    },
+    progressRoot: {
+        textAlign: "center",
+        height: "400px"
+    },
+    progress: {
+        margin: "5rem",
     }
 });
 
 function compare(column, dir, calc) {
-    if (calc !== undefined) {
+    if (calc !== null) {
         return function(a, b) {
             a = calc(a[column], a);
             b = calc(b[column], b);
@@ -248,6 +256,7 @@ class DataTable extends React.Component {
         super(props);
         this.heightContainers = [React.createRef()];
         this.widthContainers = [React.createRef()];
+        this.fixedHeader = React.createRef();
     }
 
     componentWillMount() {
@@ -257,6 +266,17 @@ class DataTable extends React.Component {
         });
         this.getData();
     };
+
+    componentDidMount() {
+        let header = this.fixedHeader.current;
+        if (header !== null) {
+            window.addEventListener('scroll', this.showFixedHeader(header.offsetTop));
+        }
+    };
+
+    componentWillUnmount() {
+        window.removeEventListener('scroll', this.showFixedHeader());
+    }
 
     getData = (filterValues) => {
         let { data, url, groups, filters } = this.props;
@@ -302,9 +322,8 @@ class DataTable extends React.Component {
                 this.widthContainers.push(React.createRef());
             }
         }
-        console.log(sortColumn);
         sortColumn = sortColumn || ordering[0];
-        sortDir = sortDir || 1;
+        sortDir = sortDir || -1;
         this.setState({
             ordering,
         });
@@ -322,15 +341,21 @@ class DataTable extends React.Component {
 
     sortData = (data, sortDir, sortColumn) => {
         let { columns } = this.state;
+        let calc = null;
+        let data_ref = this.getDataReference(sortColumn);
+        if (columns[data_ref] !== undefined) {
+            if (columns[data_ref].hasOwnProperty("calc")) {
+                calc = columns[data_ref].calc;
+            }
+        }
         this.setState({
-            data: data.sort(compare(sortColumn, sortDir, columns[sortColumn].calc)),
+            data: data.sort(compare(data_ref, sortDir, calc)),
             sortDir,
             sortColumn,
         });
     };
 
 	handleSort = (value) => () => {
-        value = this.getDataReference(value);
         let { sortColumn, sortDir, data } = this.state;
         sortDir = ((sortColumn === value) ? -sortDir : 1);
         this.sortData(data, sortDir, value);
@@ -554,6 +579,12 @@ class DataTable extends React.Component {
         }
     };
 
+    showFixedHeader = (sticky) => () => {
+        if (window.pageYOffset >= sticky) {
+            this.fixedHeader.current.style.transform = "translate(0px, " + (window.pageYOffset - sticky) + "px)";
+        }
+    };
+
     getPageControls = (page, perPage) => {
         return (<TableFooter>
                   <TableRow>
@@ -653,20 +684,28 @@ class DataTable extends React.Component {
     };
 
     getRow = (row, index, ordering, columns, totals=false) => {
-        const { classes } = this.props;
+        const { classes, freeze, theme } = this.props;
         return (
           <TableRow className={classes.tableRow} key={index}>
             {ordering.map((value, index2) => {
                 let column = columns[value];
                 let data = row[value];
+                let styles = {};
                 data = (column.hasOwnProperty("calc")) ? column.calc(data, row) : data;
                 data = column.hasOwnProperty("render") ? column.render(data, "", row) : data;
                 data = (!totals || row.hasOwnProperty(value)) ? data : (index2 === 0) ? "Totals" : null;
-                if (totals && !row.hasOwnProperty(value)) {
-                    console.log(value);
+                if (freeze !== undefined && index2 + 1 === freeze.length) {
+                    styles = {
+                        boxShadow: "grey 5px 0 5px -5px inset",
+                        height: "100%",
+                        top: 0,
+                        right: "-5px",
+                        position: "absolute",
+                        width: "5px",
+                    }
                 }
 
-                return <TableCell id={`${value}-${index + 1}`} className={classes.tableBodyCell} key={`${value}-${index}`} numeric>{data}</TableCell>
+                return <TableCell id={`${value}-${index + 1}`} className={classes.tableBodyCell} key={`${value}-${index}`} numeric>{data}<div style={styles}></div></TableCell>
             })}
           </TableRow>
         );
@@ -679,8 +718,9 @@ class DataTable extends React.Component {
         let headProps = head || {};
         let condense_button = null;
         let thead;
+        
         if (Object.keys(columns).length === 0) {
-            return null;
+            return <div className={classes.progressRoot}><CircularProgress className={classes.progress}/></div>;
         }
         if (condensed !== undefined) {
             if (condense) {
@@ -693,7 +733,7 @@ class DataTable extends React.Component {
         }
         if (splits === undefined) {
             thead = (
-                <TableHead className={classes.tableHead}>
+                <TableHead className={classes.tableHead} ref={this.fixedHeader}>
                     <TableRow className={classes.tableHeadRow}>
                         {ordering.map((value, index) => {
                             let thProps = headProps[value] || {};
@@ -761,7 +801,6 @@ class DataTable extends React.Component {
         }
 
         if (splits !== undefined) {
-            console.log(totals);
             const totalData = (totals === undefined) ? null : this.getTotal(data, totals);
 
             let splitTables = Object.keys(splits).map((s, i) => {

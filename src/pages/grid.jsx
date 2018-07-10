@@ -6,6 +6,7 @@ import CardList from '../components/cardList';
 import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
 import Paper from '@material-ui/core/Paper';
+import { Phone, MailOutline } from '@material-ui/icons';
 import Typography from '@material-ui/core/Typography';
 
 const styles = theme => ({
@@ -20,8 +21,7 @@ const styles = theme => ({
   }
 });
 
-function getItem(props) {
-  const { type, args, ...other } = props;
+function getItem(type, args, other) {
   switch(type) {
   	case "articles":
   		return <Articles {...args}/>;
@@ -29,6 +29,8 @@ function getItem(props) {
   		return <CardList {...args} {...other}/>;
     case "headlines":
       return <Headlines {...args}/>;
+    case "twitter":
+      return <Paper style={{margin: ".5rem"}}><a class="twitter-timeline" data-theme="dark" data-link-color="#F5F8FA" href={args.href}>Tweets by {args.handle}</a></Paper>;
   	default:
   		return <p>Error: Item type does not exist</p>
   }
@@ -37,11 +39,12 @@ class GridPage extends React.Component {
 	render() {
 		const { classes, grid_items, heading } = this.props;
 		let gridItems = grid_items.map((item, key) => {
-      let gridItem = getItem(item);
-      if (item.sizes.xs === undefined) {
+      const { type, sizes, args, ...other} = item;
+      let gridItem = getItem(type, args, other);
+      if (sizes.xs === undefined) {
         gridItem = <Hidden xsDown>{gridItem}</Hidden>;
       }
-      return <Grid key={key} className={classes.gridItem} {...item.sizes}>{gridItem}</Grid>;
+      return <Grid item key={key} className={classes.gridItem} {...sizes}>{gridItem}</Grid>;
     });
     const h1 = (heading === undefined) ? null : <Paper className={classes.heading}><Typography variant="headline">{heading}</Typography></Paper>;
 		return (
@@ -50,6 +53,8 @@ class GridPage extends React.Component {
   			<Grid container justify="center" spacing={8} className={classes.root}>
   		      {gridItems}
   		  </Grid>
+        <Phone/>
+        <MailOutline/>
       </div>
 		)
 	}

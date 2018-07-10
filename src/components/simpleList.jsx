@@ -28,16 +28,20 @@ const styles = theme => ({
   	paddingLeft: 0,
   	paddingRight: 0,
   },
-  liText: {
+  liPrimaryText: {
   	fontSize: "1rem",
+  },
+  liSecondaryText: {
   }
 });
 
 class SimpleList extends React.Component {
 	render() {
-		let { classes, type, items, component, styles, dense } = this.props;
+		let { classes, type, items, component, list_styles, styles, secondary_styles, dense } = this.props;
 		let content = "";
-		const li_styles = {primary: styles || classes.liText};
+		const li_styles = {primary: styles || classes.liPrimaryText, secondary: secondary_styles || classes.liSecondaryText};
+		list_styles = list_styles || classes.li;
+
 		switch(type) {
 			case "sections":
 				let sections = Object.keys(items);
@@ -58,12 +62,11 @@ class SimpleList extends React.Component {
 			default:
 				content = items.map((item, key) => {
 					let image = (item.image === undefined) ? null : <Avatar alt={item.label || item.primary} src={item.image} />;
-					let label = (item.label === undefined) ? null : <span className={classes.label}>{toTitleCase(item.label)}:&nbsp;</span>
+					let label = (item.label === undefined) ? null : toTitleCase(item.label);
 					return (
-						<ListItem key={key} className={classes.li} button component={item.component || component || "li"} {...item.props}>
+						<ListItem key={key} className={list_styles} button component={item.component || component || "li"} {...item.props}>
 							{image}
-							{label}
-							<ListItemText classes={li_styles} primary={item.primary || item.label} secondary={item.secondary} inset={item.inset}/>
+							<ListItemText classes={li_styles} primary={item.primary} secondary={item.secondary || label} inset={item.inset}/>
 						</ListItem>
 					);
 				});
