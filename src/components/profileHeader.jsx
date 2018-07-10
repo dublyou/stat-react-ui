@@ -110,13 +110,6 @@ const styles = theme => ({
   },
 });
 
-function buttonLink(props) {
-	let { classes, label, link } = props;
-	return (
-		<Button href={link} classes={{root: classes.button, label: classes.buttonLabel}} component="a">{label.replace(/ /g, "\u00a0")}</Button>
-	)
-}
-
 function profileTable(props) {
 	let { classes, data } = props;
 	const labels = Object.keys(data);
