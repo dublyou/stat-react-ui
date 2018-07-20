@@ -6,7 +6,6 @@ import CardList from '../components/cardList';
 import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
 import Paper from '@material-ui/core/Paper';
-import { Phone, MailOutline } from '@material-ui/icons';
 import Typography from '@material-ui/core/Typography';
 
 const styles = theme => ({
@@ -53,8 +52,6 @@ class GridPage extends React.Component {
   			<Grid container justify="center" spacing={8} className={classes.root}>
   		      {gridItems}
   		  </Grid>
-        <Phone/>
-        <MailOutline/>
       </div>
 		)
 	}

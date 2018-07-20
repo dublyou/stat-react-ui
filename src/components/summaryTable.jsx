@@ -24,7 +24,10 @@ const styles = theme => ({
     color: theme.palette.text.secondary,
     /*backgroundColor: theme.palette.background.default,*/
     lineHeight: "initial",
-    border: "none"
+    border: "none",
+    "&:last-child": {
+    	paddingRight: ".5rem"
+    }
   },
   tableBodyCell: {
     padding: ".1rem .5rem",
@@ -32,7 +35,10 @@ const styles = theme => ({
     textAlign: "center",
     lineHeight: "initial",
     borderLeft: ".1rem solid " + theme.palette.background.paper,
-    borderBottom: ".2rem solid " + theme.palette.background.paper
+    borderBottom: ".2rem solid " + theme.palette.background.paper,
+    "&:last-child": {
+    	paddingRight: ".5rem"
+    }
   },
 });
 

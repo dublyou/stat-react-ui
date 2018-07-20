@@ -371,9 +371,9 @@ class DataTable extends React.Component {
     };
 
     getFilters = (filterValues) => {
-        const { filters } = this.props;
+        const { filters, renders } = this.props;
         if (filters !== undefined) {
-            return <FilterBox filters={filters} filterValues={filterValues} filterChange={this.filterChange}/>;
+            return <FilterBox filters={filters} filterValues={filterValues} filterChange={this.filterChange} renders={renders}/>;
         }
         return null;
     };
@@ -388,6 +388,44 @@ class DataTable extends React.Component {
         if (filters[id].type === "url") {
             this.getData(filterValues);
         }
+    };
+
+    filterData = (data, filterValues) => {
+        const { filters } = this.props;
+        const filterRow = (row, id, operand, value) => {
+            let data = row[id];
+            switch (operand) {
+                case ">":
+                    return data > value;
+                case "<":
+                    return data < value;
+                case "=":
+                    return data === value;
+                case ">=":
+                    return data >= value;
+                case "<=":
+                    return data <= value;
+                default:
+                    return false;
+            }
+        };
+        return data.filter((row) => {
+            for (let key in filterValues) {
+                let params = key.split("__");
+                let value = filterValues[key];
+                let id = params[0];
+                let operand = "=";
+                if (filters[id].type !== "url" && value !== null && value !== "null") {
+                    if (params.length === 2) {
+                        operand = params[1];
+                    }
+                    if (!filterRow(row, id, operand, value)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        });
     };
 
     getColumns = () => {
@@ -637,7 +675,7 @@ class DataTable extends React.Component {
         const { fixed_group } = this.props;
         let { groups } = this.state;
         if (Object.keys(groups).length > 0 && fixed_group === undefined) {
-            const groupBtn = (label, group) => <Button onClick={this.changeGroupBy(group)}>{toTitleCase(label)}</Button>;
+            const groupBtn = (label, group) => <Button key={label} onClick={this.changeGroupBy(group)}>{toTitleCase(label)}</Button>;
             const btns = [groupBtn("All", null)];
             for (let group in groups) {
                 btns.push(groupBtn(group, group));
@@ -652,7 +690,7 @@ class DataTable extends React.Component {
             let { column, values, collapse } = sections;
             let section_rows = [];
             for (let value of values) {
-                section_rows.push(<TableRow className={classes.sectionRow}><TableCell colSpan={ordering.length}>{toTitleCase(value)}</TableCell></TableRow>);
+                section_rows.push(<TableRow key={value} className={classes.sectionRow}><TableCell colSpan={ordering.length}>{toTitleCase(value)}</TableCell></TableRow>);
                 section_rows = section_rows.concat(data.map((row, index) => {
                     return (row[column] === value) ? this.getRow(row, index, ordering, columns) : null;
                 }));
@@ -718,10 +756,10 @@ class DataTable extends React.Component {
         let headProps = head || {};
         let condense_button = null;
         let thead;
-        
         if (Object.keys(columns).length === 0) {
             return <div className={classes.progressRoot}><CircularProgress className={classes.progress}/></div>;
         }
+        data = this.filterData(data, filterValues); /* filter the data */
         if (condensed !== undefined) {
             if (condense) {
                 ordering = condensed;
@@ -767,6 +805,9 @@ class DataTable extends React.Component {
                     return true;
                 });
                 let totalRow = (totals === undefined) ? null : this.getRow(this.getTotal(groupData, totals), data.length, ordering, columns, true);
+                if (groupData.length === 0) {
+                    return null;
+                }
                 return (
                     <div key={Object.values(c).join("-")} className={classes.groupContainer}>
                         <Toolbar className={classes.groupHeader}>

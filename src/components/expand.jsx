@@ -72,6 +72,7 @@ function getContent(props) {
   const { type, classes, ...args } = props;
   switch(type) {
   	case "list":
+      args.items = args.items || args.data;
   		return <SimpleList {...args}/>;
   	case "table":
       args.classes = classes;

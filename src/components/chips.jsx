@@ -29,10 +29,14 @@ const styles = theme => ({
 
 class Chips extends React.Component {
 	render() {
-		const { classes, data } = this.props;
+		const { classes, data, clickable, component } = this.props;
 		return (
           	<div className={classes.root}>
-          		{Object.keys(data).map((value, i) => <Chip classes={{root: classes.chipRoot, avatar: classes.chipAvatar}} key={i} avatar={<Avatar>{value}</Avatar>} label={data[value].join(" / ")} />)}
+          		{data.map((props, i) => {
+                  let { avatar, image, ...other } = props;
+                  avatar = <Avatar src={image}>{avatar}</Avatar>;
+                  return <Chip classes={{root: classes.chipRoot, avatar: classes.chipAvatar}} key={i} avatar={avatar} {...other} component={component || "div"} clickable={clickable}/>;
+              })}
           	</div>
 		);
 	}

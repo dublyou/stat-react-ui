@@ -60,11 +60,21 @@ class SimpleList extends React.Component {
 				));
 				break;
 			default:
+				if (!(items instanceof Array)) {
+					items = Object.keys(items).map(value => {
+						let item = {primary: items[value]};
+						if (items[value] instanceof Object) {
+							item = items[value];
+						}
+						item.label = value;
+						return item;
+					});
+				}
 				content = items.map((item, key) => {
 					let image = (item.image === undefined) ? null : <Avatar alt={item.label || item.primary} src={item.image} />;
 					let label = (item.label === undefined) ? null : toTitleCase(item.label);
 					return (
-						<ListItem key={key} className={list_styles} button component={item.component || component || "li"} {...item.props}>
+						<ListItem key={key} className={list_styles} button={(component === "a")} component={item.component || component || "li"} {...item.props}>
 							{image}
 							<ListItemText classes={li_styles} primary={item.primary} secondary={item.secondary || label} inset={item.inset}/>
 						</ListItem>

@@ -24,45 +24,45 @@ const styles = theme => ({
 function cardHeader(props) {
   const { classes } = props;
   return (
-  	<CardHeader {...this.props}/>
+  	<CardHeader key={index} {...this.props}/>
   );
 }
 
-function cardMedia(props) {
+function cardMedia(props, index) {
   const { classes } = props;
   return (
-  	<CardMedia {...props}/>
+  	<CardMedia key={index} {...props}/>
   );
 }
 
-function cardAvatar(props) {
+function cardAvatar(props, index) {
   const { classes, size, image, title } = props;
   const styles = {height: size || "4rem", weight: size || "4rem"};
   return (
-    <Avatar style={styles} title={title} src={image} />
+    <Avatar key={title} style={styles} title={title} src={image} />
   );
 }
 
-function typography(props) {
+function typography(props, index) {
 	const { content, text, hidden, ...other } = props;
   let inner;
 	if (text === undefined) {
-		inner = <Typography {...other}/>;
+		inner = <Typography key={index}  {...other}/>;
 	}
-	inner = <Typography {...other}>{text}</Typography>;
+	inner = <Typography key={index} {...other}>{text}</Typography>;
   if (hidden !== undefined) {
     let args = {};
     args[hidden] = true;
-    return <Hidden {...args}>{inner}</Hidden>;
+    return <Hidden key={`hidden-${index}`} {...args}>{inner}</Hidden>;
   }
   return inner;
 }
 
-function cardContent(props) {
+function cardContent(props, index) {
 	const { classes, items } = props;
 	return (
-		<CardContent className={classes.content}>
-			{items.map((props) => typography(props))}
+		<CardContent key={index} className={classes.content}>
+			{items.map((props, i) => typography(props, i))}
     </CardContent>
 	);
 }
@@ -80,9 +80,9 @@ class CustomCard extends React.Component {
 
 		return (
 			<Card className={classes.card} style={styles}>
-				{content.map((props) => {
+				{content.map((props, index) => {
           props["classes"] = classes;
-          return cardFunctions[props.type](props);
+          return cardFunctions[props.type](props, index);
         })}
 	    </Card>
 		);

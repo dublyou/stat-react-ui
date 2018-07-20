@@ -13,6 +13,7 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
+import TextField from '@material-ui/core/TextField';
 
 const styles = theme => ({
     root: {
@@ -29,7 +30,13 @@ function toTitleCase(str) {
 }
 
 function NumberFormatCustom(props) {
-  const { inputRef, onChange, ...other } = props;
+  const { type, inputRef, onChange, ...other } = props;
+  let format_props = {};
+  if (type === "percent") {
+    format_props.suffix = "%";
+  } else if (type === "currency") {
+    format_props = {prefix: "$ ", thousandSeparator: true};
+  }
 
   return (
     <NumberFormat
@@ -42,20 +49,9 @@ function NumberFormatCustom(props) {
           },
         });
       }}
-      thousandSeparator
-      prefix="$"
+      {...format_props}
     />
   );
-  /*<TextField
-      className={classes.formControl}
-      label="react-number-format"
-      value={numberformat}
-      onChange={this.handleChange('numberformat')}
-      id="formatted-numberformat-input"
-      InputProps={{
-        inputComponent: NumberFormatCustom,
-      }}
-    />*/
 }
 
 class FilterBox extends React.Component {
@@ -65,13 +61,36 @@ class FilterBox extends React.Component {
     };
 
     handleChange = (id) => (event) => {
-        const { filterChange } = this.props
+        const { filterChange } = this.props;
         let value = event.target.value;
         filterChange(id, value);
-        /*this.setState({
+    };
+
+    addFilter = (id) => (event) => {
+      const { filterChange } = this.props;
+      const { selected } = this.state;
+      let value = document.getElementById("filterValue").value;
+      let direction = document.getElementById("filterDirection").value;
+      filterChange(`${selected}__${direction}`, value);
+      this.setState({
+          open: false,
+          selected: null,
+      });
+    };
+
+    removeFilter = (id) => () => {
+      const { filterChange } = this.props;
+      filterChange(id, null);
+    };
+
+    handleFilterSelect = (event) => {
+        let value = event.target.value;
+        if (value) {
+          this.setState({
             open: true,
             selected: value,
-        })*/
+        });
+        }
     };
 
     handleClose = () => {
@@ -82,14 +101,64 @@ class FilterBox extends React.Component {
     };
 
     render() {
-        const { classes, filters, filterValues } = this.props;
+        const { classes, filters, filterValues, renders } = this.props;
         let filter_ids = Object.keys(filters);
+        let dataFilters = filter_ids.filter((id) => filters[id].type === "data");
+        let filterSelect = null;
+        if (dataFilters.length > 0) {
+          filterSelect = (
+              <span>
+                  <label for="filterSelect">Filters</label>
+                  <select onChange={this.handleFilterSelect} name='filterSelect' id='filterSelect'>
+                      <option value="" selected={this.state.selected === null}>Choose a filter</option>
+                      {dataFilters.map((value) => <option value={value} selected={this.state.selected === value}>{filters[value] || toTitleCase(value)}</option>)}
+                  </select>
+                   <Dialog
+                      open={this.state.open}
+                      onClose={this.handleClose}
+                      aria-labelledby="form-dialog-title"
+                    >
+                      <DialogTitle id="form-dialog-title">New Filter</DialogTitle>
+                      <DialogContent>
+                        <FormControl className={classes.formControl}>
+                            <InputLabel>{toTitleCase(this.state.selected)}</InputLabel>
+                            <Select
+                            onChange={this.handleFilterSelect}
+                            inputProps={{
+                              value: "",
+                              id: "filterDirection"
+                            }}
+                            >
+                                {[">", "<", ">=", "<=", "="].map((option) => <MenuItem value={option}>{toTitleCase(option)}</MenuItem>)}
+                            </Select>
+                            <TextField
+                              id="filterValue"
+                              type={renders[this.state.selected].type}
+                              InputProps={{
+                                inputComponent: NumberFormatCustom,
+                              }}
+                            />
+                        </FormControl>
+                      </DialogContent>
+                      <DialogActions>
+                          <Button onClick={this.handleClose} color="primary">
+                            Cancel
+                          </Button>
+                          <Button onClick={this.addFilter} color="primary">
+                            Add Filter
+                          </Button>
+                      </DialogActions>
+                    </Dialog>
+              </span>
+          );
+        }
         return (
             <div className={classes.root}>
                 {filter_ids.map((value, i) => {
+                  if (filters[value].type === "url") {
                     return (
                         <FormControl key={i} className={classes.formControl}>
-                            <InputLabel htmlFor={value}>{toTitleCase(value)}</InputLabel>
+                            <InputLabel htmlFor={value}>{filters[value].label || toTitleCase(value)}</InputLabel>
                             <Select
                             onChange={this.handleChange(value)}
                             inputProps={{
@@ -101,43 +170,28 @@ class FilterBox extends React.Component {
                             </Select>
                         </FormControl>
                     );
+                  }
                 })}
-            </div>
-        );
-        return (
-            <div>
-                <FormControl>
-                    <InputLabel htmlFor="filter-select">Filters</InputLabel>
-                    <Select
-                    onChange={this.handleChange}
-                    inputProps={{
-                      name: 'filter-select',
-                      id: 'filter-select',
-                    }}
-                    >
-                        <MenuItem value="">
-                          <em>None</em>
-                        </MenuItem>
-                        {filter_ids.map((value) => <MenuItem value={value}>{filters[value] || toTitleCase(value)}</MenuItem>)}
-                    </Select>
-                </FormControl>
-                <Dialog
-                  open={this.state.open}
-                  onClose={this.handleClose}
-                  aria-labelledby="form-dialog-title"
-                >
-                    <DialogTitle id="form-dialog-title">New Filter</DialogTitle>
-                    <DialogContent>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={this.handleClose} color="primary">
-                          Cancel
-                        </Button>
-                        <Button onClick={this.handleClose} color="primary">
-                          Add Filter
-                        </Button>
-                    </DialogActions>
-                </Dialog>
+                {filter_ids.map((value, i) => {
+                  if (filters[value].type === "select") {
+                    return (
+                        <FormControl key={i} className={classes.formControl}>
+                            <InputLabel htmlFor={value}>{filters[value].label || toTitleCase(value)}</InputLabel>
+                            <Select
+                              onChange={this.handleChange(value)}
+                              value={filterValues[value]}
+                              inputProps={{
+                                name: value,
+                              }}
+                            >
+                                <MenuItem value="null">All</MenuItem>
+                                {filters[value].options.map((option) => <MenuItem value={option.value || option}>{option.label || toTitleCase(option)}</MenuItem>)}
+                            </Select>
+                        </FormControl>
+                    );
+                  }
+                })}
+                {filterSelect}
             </div>
         );
     }

@@ -25,6 +25,10 @@ const styles = theme => ({
   	padding: 5,
   	borderRadius: 0,
   },
+  accordionContainer: {
+  	display: "flex",
+  	flex: "1 1 auto",
+  },
   accordion: {
   	maxWidth: "30rem",
   	margin: "auto",
@@ -84,10 +88,11 @@ const styles = theme => ({
   summaryTableContainer: {
   	maxWidth: "30rem",
   	margin: "5px auto 0",
-  	textAlign: "right"
+  	display: "flex",
+  	flex: "1 1 auto"
   },
   summaryTable: {
-  	display: "inline-block",
+  	margin: "0 auto",
   },
   profileContent: {
   	padding: "0",
@@ -153,7 +158,7 @@ function getHeaderContent(props) {
 				content.push(<div key="profileHeading" className={classes.headingContainer}><Typography className={classes.heading} variant="headline">{primaryHeading}</Typography>{secondaryHeading}</div>);
 			}
 			if (cards !== undefined && cards !== null) {
-				content = content.concat(cards.map((card, index) => <CustomCard index={index} {...card}/>));
+				content = content.concat(cards.map((card, index) => <CustomCard key={index} {...card}/>));
 			}
 			if (image !== undefined && image !== null) {
 				let cardMedia = <CardMedia key="profileMedia" className={classes.image} image={image} title={heading || "image"}/>;
@@ -171,22 +176,17 @@ function getHeaderContent(props) {
 			if (details !== undefined && details !== null) {
 				const increment = 4;
 				let count = Math.ceil(details.length / increment)
+				console.log(details);
 				for (let i = 0; i < count; i++) {
 					let items = details.slice(i * increment, (i + 1) * increment)
 					subcontent.push(<SimpleList key={i} items={items} list_styles={classes.detailList} styles={classes.detailItem} secondary_styles={classes.detailItemLabel}/>);
 				}
 			}
-			if ((accordion !== undefined && accordion !== null) || (summary_table !== undefined && summary_table !== null)) {
-				let accordionEl = null;
-				let summaryTableEl = null;
-				
-				if (summary_table !== undefined) {
-					summaryTableEl = <div className={classes.summaryTableContainer}><div className={classes.summaryTable}><SummaryTable data={summary_table}/></div></div>;
-				}
-				if (accordion !== undefined) {
-					accordionEl = <Accordion classes={{root: classes.accordion}} expands={accordion}/>;
-				}
-				subcontent.push(<div key="profileAccordion" style={{display: "flex", flexWrap: "wrap", flex: "1 1 auto"}}>{summaryTableEl}{accordionEl}</div>);
+			if (summary_table !== undefined && summary_table !== null) {
+				subcontent.push(<div key="summaryTable" className={classes.summaryTableContainer}><div className={classes.summaryTable}><SummaryTable data={summary_table}/></div></div>);
+			}
+			if (accordion !== undefined && accordion !== null) {
+				subcontent.push(<div key="profileAccordion" className={classes.accordionContainer}><Accordion classes={{root: classes.accordion}} expands={accordion}/></div>);
 			}
 			content.push(<Card key="profileCard" className={classes.card}>{subcontent}</Card>);
 	}
