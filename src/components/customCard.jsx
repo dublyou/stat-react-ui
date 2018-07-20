@@ -21,7 +21,7 @@ const styles = theme => ({
   }
 });
 
-function cardHeader(props) {
+function cardHeader(props, index) {
   const { classes } = props;
   return (
   	<CardHeader key={index} {...this.props}/>
