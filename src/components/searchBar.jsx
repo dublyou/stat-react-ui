@@ -185,7 +185,7 @@ class SearchBar extends React.Component {
             axios.get(getUrl(url)).then(res => {
               return res.data;
             }).catch(error => {
-              return sample_teams;
+              return [];
             }).then(data => {
               this.setState({
                 originalSuggestions: data,
