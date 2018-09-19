@@ -236,7 +236,7 @@ class Comparison extends React.Component {
     } else {
       url = getUrl(url, { id: obj.id, fields: fields.join("-") });
       if (filters !== null) {
-        for (filter in filters) {
+        for (let filter in filters) {
           url += `${filter}=${filters.join("-")}/`;
         }
       }
@@ -341,7 +341,7 @@ class Comparison extends React.Component {
   handleFilterChange = (filter) => (event) => {
     let { selectedFilters } = this.state;
     selectedFilters[filter] = event.target.value;
-    this.setState({ selectedFields });
+    this.setState({ selectedFilters });
   };
 
   handleFilterAdd = (obj, filters) => () => {
