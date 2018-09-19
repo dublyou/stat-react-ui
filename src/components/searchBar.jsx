@@ -10,12 +10,11 @@ import ListItemText from '@material-ui/core/ListItemText';
 import { withStyles } from '@material-ui/core/styles';
 import axios from 'axios';
 import FuzzySet from 'fuzzyset.js';
-import sample_suggestions from '../sample_data/player_search';
-import sample_teams from '../sample_data/active_teams';
+import { getUrl, getImage } from '../utils/url';
 
 const styles = theme => ({
   container: {
-    flexGrow: .2,
+    flexGrow: 1,
     position: 'relative',
   },
   suggestionsContainerOpen: {
@@ -39,7 +38,7 @@ const styles = theme => ({
     font: "inherit",
     border: 0,
     margin: 0,
-    padding: "6px 0 7px",
+    padding: ".35rem 0 .4rem",
     display: "block",
     minWidth: 0,
     flexGrow: 1,
@@ -51,7 +50,6 @@ const styles = theme => ({
     }
   },
   searchContainer1: {
-    width: 175,
     height: 40,
     display: "flex",
     justifyContent: "space-between",
@@ -62,11 +60,12 @@ const styles = theme => ({
     "&:hover": {
       backgroundColor: "#fff"
     },
-    marginRight: 4
+    marginRight: 4,
+    transition: "all .5s ease"
   },
   searchContainer2: {
     width: "100%",
-    margin: "auto 8px",
+    margin: "auto .5rem",
   },
   searchContainer3: {
     width: "100%",
@@ -79,10 +78,10 @@ const styles = theme => ({
 });
 
 function searchInput(props) {
-  const { classes, container, ...other } = props;
+  const { classes, container, width, ...other } = props;
 
   return (
-    <div className={classes.searchContainer1} ref={container}>
+    <div style={{width}} className={classes.searchContainer1} ref={container}>
       <div className={classes.searchContainer2}>
         <div className={classes.searchContainer3}>
           <input className={classes.input} {...other} type="text"/>
@@ -92,35 +91,11 @@ function searchInput(props) {
   );
 }
 
-function renderSuggestion(suggestion, { query, isHighlighted }) {
-  const matches = match(suggestion.name, query);
-  const parts = parse(suggestion.name, matches);
-
-  return (
-    <MenuItem button selected={isHighlighted} component="a" href={suggestion.url}>
-      <Avatar alt={suggestion.name} src={suggestion.image} />
-      <ListItemText>
-        {parts.map((part, index) => {
-          return part.highlight ? (
-            <span key={String(index)} style={{ fontWeight: 500 }}>
-              {part.text}
-            </span>
-          ) : (
-            <strong key={String(index)} style={{ fontWeight: 200 }}>
-              {part.text}
-            </strong>
-          );
-        })}
-      </ListItemText>
-    </MenuItem>
-  );
-}
-
 function renderSuggestionsContainer(options) {
   let { containerProps, children } = options;
   
   return (
-    <Paper {...containerProps} square>
+    <Paper {...containerProps} square style={{zIndex: 10}}>
       {children}
     </Paper>
   );
@@ -185,32 +160,29 @@ class SearchBar extends React.Component {
     const { url, type } = this.props;
     const inputValue = value.trim().toLowerCase();
     const inputLength = value.length;
-    let { suggestions, originalSuggestions } = this.state;
-
+    let { originalSuggestions } = this.state;
     if (type === "fetch") {
-        if (originalSuggestions.length === 0 && inputLength > 4) {
-            const dataurl = `${url}${inputValue}/`;
+        if (inputLength > 2) {
+            const dataurl = `${getUrl(url)}${inputValue}/`;
             axios.get(dataurl).then(res => {
               return res.data;
             }).catch(error => {
-              return sample_suggestions;
+              return [];
             }).then(data => {
               this.setState({
                 originalSuggestions: data,
+                suggestions: data.slice(0, 5),
               });
-            });
-        } else if (inputLength > 4) {
-            this.setState({
-              suggestions: getSuggestions(originalSuggestions, inputValue),
             });
         } else {
             this.setState({
                 originalSuggestions: [],
+                suggestions: [],
             });
         }
     } else {
         if (type === "load" && originalSuggestions.length === 0) {
-            axios.get(url).then(res => {
+            axios.get(getUrl(url)).then(res => {
               return res.data;
             }).catch(error => {
               return sample_teams;
@@ -234,6 +206,40 @@ class SearchBar extends React.Component {
     }
   };
 
+  renderSuggestion = (suggestion, { query, isHighlighted }) => {
+    const { handleClick } = this.props;
+    const matches = match(suggestion.name, query);
+    const parts = parse(suggestion.name, matches);
+    const props = {};
+    props.component = "span";
+    if (handleClick !== undefined) {
+      props.onClick = this.handleClick(suggestion);
+    } else {
+      props.href = suggestion.url;
+      props.component = "a";
+    }
+
+    let primaryText = parts.map((part, index) => {
+            return part.highlight ? (
+              <span key={String(index)} style={{ fontWeight: 500 }}>
+                {part.text}
+              </span>
+            ) : (
+              <strong key={String(index)} style={{ fontWeight: 200 }}>
+                {part.text}
+              </strong>
+            );
+          });
+    let secondaryText = (suggestion.subheader !== undefined) ? suggestion.subheader : null;
+
+    return (
+      <MenuItem key={suggestion.id || suggestion.name} button selected={isHighlighted} {...props}>
+        <Avatar alt={suggestion.name} src={getImage(suggestion.image)} />
+        <ListItemText primary={primaryText} secondary={secondaryText}/>
+      </MenuItem>
+    );
+  };
+
   handleSuggestionsClearRequested = () => {
     this.setState({
       suggestions: [],
@@ -246,20 +252,63 @@ class SearchBar extends React.Component {
     });
   };
 
+  handleClick = (suggestion) => () => {
+    const { handleClick } = this.props;
+    handleClick(suggestion);
+    setTimeout(() => this.setState({value: ''}), 400);;
+  };
+
   handleFocus = () => {
-    this.container.current.style.width = "250px";
-    this.container.current.style.outline = "2px solid #0099ff";
+    const { growOnFocus=true } = this.props;
+    if (growOnFocus) {
+      this.container.current.style.width = "15rem";
+    }
+    this.container.current.style.outline = ".2rem solid #0099ff";
     this.container.current.style.backgroundColor= "#fff";
   };
 
   handleBlur = () => {
-    this.container.current.style.width = "175px";
+    const { growOnFocus=true } = this.props;
+    if (growOnFocus) {
+      this.container.current.style.width = "10rem";
+    }
     this.container.current.style.outline = "0";
     this.container.current.style.backgroundColor= "#ddd";
   };
 
+  handleKeyPress = (event) => {
+    if(event.key == 'Enter') {
+      let suggestions = this.state.originalSuggestions;
+      if (suggestions.length > 0) {
+        let { handleClick } = this.props;
+        const value = event.target.value;
+        const filteredSuggestions = suggestions.filter(suggestion => suggestion.name === value);
+        if (filteredSuggestions.length > 0) {
+          suggestions = filteredSuggestions;
+        }
+        if (handleClick !== undefined) {
+          this.handleClick(suggestions[0])();
+        } else {
+          window.location.href = suggestions[0].url;
+        }
+      }
+    }
+  };
+
   render() {
-    const { classes, label } = this.props;
+    const { classes, label, placeholder, width } = this.props;
+    let inputProps = {
+      classes,
+      container: this.container,
+      placeholder: placeholder || `Search for ${label}...`,
+      value: this.state.value,
+      onChange: this.handleChange,
+      onKeyPress: this.handleKeyPress,
+      onFocus: this.handleFocus,
+      onBlur: this.handleBlur,
+      width: width || "10rem",
+    }
+
     return (
       <Autosuggest
         theme={{
@@ -274,16 +323,8 @@ class SearchBar extends React.Component {
         onSuggestionsClearRequested={this.handleSuggestionsClearRequested}
         renderSuggestionsContainer={renderSuggestionsContainer}
         getSuggestionValue={getSuggestionValue}
-        renderSuggestion={renderSuggestion}
-        inputProps={{
-          classes,
-          container: this.container,
-          placeholder: `Search for ${label}...`,
-          value: this.state.value,
-          onChange: this.handleChange,
-          onFocus: this.handleFocus,
-          onBlur: this.handleBlur,
-        }}
+        renderSuggestion={this.renderSuggestion}
+        inputProps={inputProps}
       />
     );
   }
@@ -291,6 +332,8 @@ class SearchBar extends React.Component {
 
 SearchBar.propTypes = {
   classes: PropTypes.object.isRequired,
+  url: PropTypes.string.isRequired,
+  type: PropTypes.string.isRequired
 };
 
 export default withStyles(styles)(SearchBar);

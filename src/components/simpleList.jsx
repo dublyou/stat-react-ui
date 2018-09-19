@@ -11,6 +11,10 @@ function toTitleCase(str) {
 }
 
 const styles = theme => ({
+  avatar: {
+  	height: "2.5rem",
+  	width: "2.5rem",
+  },
   label: {
   	color: theme.palette.text.secondary,
   	fontSize: theme.typography.pxToRem(12),
@@ -28,6 +32,9 @@ const styles = theme => ({
   	paddingLeft: 0,
   	paddingRight: 0,
   },
+  liRootText: {
+  	padding: "0 1rem",
+  },
   liPrimaryText: {
   	fontSize: "1rem",
   },
@@ -39,7 +46,7 @@ class SimpleList extends React.Component {
 	render() {
 		let { classes, type, items, component, list_styles, styles, secondary_styles, dense } = this.props;
 		let content = "";
-		const li_styles = {primary: styles || classes.liPrimaryText, secondary: secondary_styles || classes.liSecondaryText};
+		const li_styles = {root: classes.liRootText, primary: styles || classes.liPrimaryText, secondary: secondary_styles || classes.liSecondaryText};
 		list_styles = list_styles || classes.li;
 
 		switch(type) {
@@ -71,7 +78,7 @@ class SimpleList extends React.Component {
 					});
 				}
 				content = items.map((item, key) => {
-					let image = (item.image === undefined) ? null : <Avatar alt={item.label || item.primary} src={item.image} />;
+					let image = (item.image === undefined) ? null : <Avatar className={classes.avatar} alt={item.label || item.primary} src={item.image} />;
 					let label = (item.label === undefined) ? null : toTitleCase(item.label);
 					return (
 						<ListItem key={key} className={list_styles} button={(component === "a")} component={item.component || component || "li"} {...item.props}>

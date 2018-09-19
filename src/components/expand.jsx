@@ -6,6 +6,7 @@ import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Typography from '@material-ui/core/Typography';
+import CustomCard from './customCard';
 import SimpleList from './simpleList';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -32,7 +33,7 @@ const styles = theme => ({
   },
   expandDetails: {
   	padding: "0",
-  	maxHeight: "500px",
+  	maxHeight: "200px",
   	overflow: "auto",
   	display: "block"
   },
@@ -58,13 +59,18 @@ function toTitleCase(str) {
 }
 
 function simpleTable(props) {
-	let { classes, data } = props;
+	let { classes, data, caption } = props;
 	const labels = Object.keys(data);
+  let tfoot = null;
+  if (caption !== undefined) {
+    tfoot = <TableFooter><TableRow><TableCell colSpan={labels.length}>{caption.map((value, i) => <div key={i}>{value}</div>)}</TableCell></TableRow></TableFooter>;
+  }
 	return (
 		<Table className={classes.table}>
 			<TableHead><TableRow className={classes.tableRow}>{labels.map((value, i) => <TableCell key={i} className={classes.tableCell}>{toTitleCase(value)}</TableCell>)}</TableRow></TableHead>
 			<TableBody><TableRow className={classes.tableRow}>{labels.map((value, i) => <TableCell key={i} className={classes.tableCell}>{data[value]}</TableCell>)}</TableRow></TableBody>
-		</Table>
+		  {tfoot}
+    </Table>
 	);
 }
 
@@ -73,12 +79,14 @@ function getContent(props) {
   switch(type) {
   	case "list":
       args.items = args.items || args.data;
-  		return <SimpleList {...args}/>;
+  		return <SimpleList {...args} dense={true}/>;
   	case "table":
       args.classes = classes;
   		return simpleTable(args);
     case "chips":
       return <Chips {...args}/>;
+    case "cards":
+      return <CustomCard {...args}/>;
   	default:
   		return <p>Error: Item type does not exist</p>
   }
@@ -90,7 +98,7 @@ class Expand extends React.Component {
 		expand["classes"] = classes;
 		const content = getContent(expand);
 		return (
-          	<ExpansionPanel className={classes.root} {...other}>
+        <ExpansionPanel className={classes.root} {...other}>
 		        <ExpansionPanelSummary classes={{root: classes.expandRoot, expanded: classes.expandExpanded, content: classes.expandSummary}} expandIcon={<ExpandMoreIcon />}>
 		          <Typography className={classes.heading}>{expand.title}</Typography>
 		        </ExpansionPanelSummary>

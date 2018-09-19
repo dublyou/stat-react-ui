@@ -3,10 +3,6 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogTitle from '@material-ui/core/DialogTitle';
 import Divider from '@material-ui/core/Divider';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -14,6 +10,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Hidden from '@material-ui/core/Hidden';
 import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/Search';
+import CloseIcon from '@material-ui/icons/Close';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import SimpleMenu from './menu';
 import SideNav from './sidenav';
@@ -50,19 +47,35 @@ const styles = theme => ({
   listItems: {
     fontSize: "1.2rem",
   },
-  dialogRoot: {
-    alignItems: "flex-start",
-  },
-  dialogPaper: {
-    backgroundColor: theme.palette.background.default,
-    overflowY: "initial"
-  },
-  dialogContent: {
-    overflowY: "initial"
-  },
   sectionTitle: {
     padding: ".5rem",
     textAlign: "center"
+  },
+  searchBar: {
+    position: "absolute",
+    bottom: -50,
+    left: 0,
+    width: "100%",
+    textAlign: "center",
+  },
+  searchBarContainer: {
+    display: "inline-block",
+    backgroundColor: theme.palette.grey[900],
+    opacity: .9,
+    padding: ".5rem",
+    position: "relative",
+    boxShadow: theme.shadows[2]
+  },
+  hideSearchButton: {
+    position: "absolute",
+    top: "-1rem",
+    right: "-1rem",
+    backgroundColor: theme.palette.background.default,
+    height: "2rem",
+    width: "2rem",
+  },
+  closeIcon: {
+    fontSize: "inherit"
   }
 });
 
@@ -70,7 +83,7 @@ class NavBar extends React.Component {
   state = {
     anchorEl: null,
     left: false,
-    openDialog: false,
+    showSearch: false,
   };
 
   handleMenu = event => {
@@ -93,16 +106,30 @@ class NavBar extends React.Component {
     }
   };
 
-  toggleSearch = (open) => () => {
-    this.setState({openDialog: open});
+  toggleSearch = (show) => () => {
+    show = (show === undefined) ? !this.state.showSearch : show;
+    this.setState({showSearch: show});
   };
 
   render() {
     const { classes, search_bar, title, side_nav, resources } = this.props;
     let searchBar = null;
+    let searchBarContainer = null;
     if (search_bar !== undefined) {
       const { type, searches } = search_bar
       searchBar = (type === "select" ? <SearchSelect searches={searches}/> : <SearchBar search_bar={search_bar}/>);
+    }
+    if (this.state.showSearch) {
+      searchBarContainer = (
+        <div className={classes.searchBar}>
+          <span className={classes.searchBarContainer}>
+            {searchBar}
+            <IconButton className={classes.hideSearchButton} onClick={this.toggleSearch(false)} color="inherit" aria-label="hideSearch">
+              <CloseIcon fontSize="inherit" classes={{root: classes.closeIcon}}/>
+            </IconButton>
+          </span>
+        </div>
+      );
     }
     
     return (
@@ -118,26 +145,12 @@ class NavBar extends React.Component {
           </div>
           <Hidden xsDown>{searchBar}</Hidden>
           <Hidden smUp>
-            <IconButton onClick={this.toggleSearch(true)} color="inherit" aria-label="Search">
+            <IconButton onClick={this.toggleSearch()} color="inherit" aria-label="Search">
               <SearchIcon />
             </IconButton>
           </Hidden>
+          {searchBarContainer}
         </Toolbar>
-        <Dialog
-          open={this.state.openDialog}
-          onClose={this.toggleSearch(false).bind(this)}
-          classes={{paper: classes.dialogPaper, root: classes.dialogRoot}}
-        >
-            <DialogTitle>Search</DialogTitle>
-            <DialogContent className={classes.dialogContent}>
-              {searchBar}
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={this.toggleSearch(false).bind(this)} color="primary">
-                  Close
-                </Button>
-            </DialogActions>
-        </Dialog>
         <SideNav toggle={this.toggleDrawer(false).bind(this)} open={this.state.left}>
           <div className={classes.drawerHeader}>
             <div className={classes.container} style={{marginLeft: 10}}>

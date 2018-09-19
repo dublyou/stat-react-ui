@@ -6,7 +6,6 @@ import CardHeader from '@material-ui/core/CardHeader';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
 import Hidden from '@material-ui/core/Hidden';
-import DetailList from './detailList';
 import Accordion from './accordion';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
@@ -176,9 +175,8 @@ function getHeaderContent(props) {
 			if (details !== undefined && details !== null) {
 				const increment = 4;
 				let count = Math.ceil(details.length / increment)
-				console.log(details);
 				for (let i = 0; i < count; i++) {
-					let items = details.slice(i * increment, (i + 1) * increment)
+					let items = details.slice(i * increment, (i + 1) * increment);
 					subcontent.push(<SimpleList key={i} items={items} list_styles={classes.detailList} styles={classes.detailItem} secondary_styles={classes.detailItemLabel}/>);
 				}
 			}

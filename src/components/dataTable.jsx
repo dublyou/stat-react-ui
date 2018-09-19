@@ -3,7 +3,6 @@ import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Paper from '@material-ui/core/Paper';
 import Switch from '@material-ui/core/Switch';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -16,7 +15,6 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import FilterBox from './filterBox';
 import axios from 'axios';
-import sample_data from '../sample_data/team_roster';
 
 const getCombos = (group_by, groups, combos=[], count=0) => {
     let labels = group_by;
@@ -46,19 +44,6 @@ const getCombos = (group_by, groups, combos=[], count=0) => {
 function toTitleCase(str) {
     str = "" + str;
     return str.replace(/_/g, " ").replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
-}
-
-function get_sign(txt) {
-    var return_val = "";
-    if (txt.substr(0, 1) === "g") {
-        return_val += ">";
-    } else if (txt.substr(0, 1) === "l") {
-        return_val += "<";
-    }
-    if (txt.slice(-1) === "e") {
-        return_val += "=";
-    }
-    return return_val;
 }
 
 function toCurrency(x) {
@@ -132,6 +117,7 @@ const styles = theme => ({
         paddingRight: 10,
         borderBottom: "1px solid #fff",
         textAlign: "left",
+        whiteSpace: "nowrap",
     },
     sectionRow: {
         height: 30,
@@ -221,24 +207,6 @@ function compare(column, dir, calc) {
     };
 }
 
-function filterData(row, id, operand, value) {
-    let data = row[id];
-    switch (operand) {
-        case ">":
-            return data > value;
-        case "<":
-            return data < value;
-        case "=":
-            return data === value;
-        case ">=":
-            return data >= value;
-        case "<=":
-            return data <= value;
-        default:
-            return false;
-    }
-}
-
 class DataTable extends React.Component {
     state = {
         ordering: [],
@@ -279,7 +247,7 @@ class DataTable extends React.Component {
     }
 
     getData = (filterValues) => {
-        let { data, url, groups, filters } = this.props;
+        let { data, url, filters } = this.props;
         let state_data = this.state.data;
         if (filters !== undefined && filterValues === undefined) {
             filterValues = {};
@@ -480,7 +448,7 @@ class DataTable extends React.Component {
                 func = (value, row, data) => {
                     value = value || row[column];
                     let column_data = data.map(r => r[column]).sort(compare_values);
-                    if (dir == -1) {
+                    if (dir === -1) {
                         column_data = column_data.reverse()
                     }
                     for (let rank = 1; rank <= column_data.length; rank++) {
@@ -525,6 +493,8 @@ class DataTable extends React.Component {
                         case "type":
                             return_string = return_string.replace(matches[i], type);
                             break;
+                        default:
+                            break;
                     }
                 }
             }
@@ -564,6 +534,21 @@ class DataTable extends React.Component {
             case "number":
                 func = (data, type, row) => (typeof data !== undefined && data !== null && data !== "N/A") ? Number.parseFloat(data).toFixed(decimal_places) : "";
                 break;
+            case "time":
+                func = (data, type, row) => {
+                    if (typeof data !== undefined && data !== null && data !== "N/A") {
+                        let time_parts = data.split(":");
+                        let minutes = parseInt(time_parts[0]);
+                        let seconds = parseInt(time_parts[1]);
+                        let milliseconds = parseInt(time_parts[2]);
+                        if (minutes > 0) {
+                            return [minutes, seconds].join(":");
+                        }
+                        return seconds + "." + milliseconds + " s"
+                    }
+                    return "";
+                };
+                break;
             default:
                 func = (data, type, row) => {return data;};
         }
@@ -579,9 +564,7 @@ class DataTable extends React.Component {
     };
 
     handleYScroll = (index) => () => {
-        
         const { freeze } = this.props;
-        const { data } = this.state;
         let heightContainer = this.heightContainers[index].current;
         let widthContainer = this.widthContainers[index].current;
         let translate = "translate(" + widthContainer.scrollLeft + "px, " + heightContainer.scrollTop + "px)";
@@ -742,7 +725,6 @@ class DataTable extends React.Component {
                         width: "5px",
                     }
                 }
-
                 return <TableCell id={`${value}-${index + 1}`} className={classes.tableBodyCell} key={`${value}-${index}`} numeric>{data}<div style={styles}></div></TableCell>
             })}
           </TableRow>
@@ -793,7 +775,6 @@ class DataTable extends React.Component {
         let footer = (paginate) ? this.getPageControls(page, perPage) : null;
         data = (paginate) ? data.slice(page * perPage, page * perPage + perPage) : data;
         if (group_by.length > 0 && Object.keys(groups).length > 0) {
-            let table;
             let combinations = getCombos(group_by, groups);
             let groupedTables = combinations.map((c, i) => {
                 let groupData = data.filter(row => {
