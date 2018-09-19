@@ -27,32 +27,6 @@ function toTitleCase(str) {
     return str.replace(/_/g, " ").replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }
 
-function deleteDist(str1, str2) {
-  var value = 0,
-      l1 = str1.length - 1,
-      l2 = str2.length - 1;
-  if (l1 === -1) {
-    if (l2 >= 0) {
-      for (var i = 0; i <= l2; i++) {
-        value += str2.charCodeAt(i);
-      }
-    }
-    return value;
-  }
-  if (l2 === -1) {
-    if (l1 >= 0) {
-      for (var i = 0; i <= l1; i++) {
-        value += str1.charCodeAt(i);
-      }
-    }
-    return value;
-  }
-  if (str1.charAt(l1) === str2.charAt(l2)) {
-    return deleteDist(str1.substr(0, l1), str2.substr(0, l2));
-  }
-  return Math.min(str1.charCodeAt(l1) + deleteDist(str1.substr(0, l1), str2), str2.charCodeAt(l2) + deleteDist(str1, str2.substr(0, l2)));
-}
-
 function NumberFormatCustom(props) {
   const { type, inputRef, onChange, ...other } = props;
   let format_props = {};
@@ -131,7 +105,7 @@ class FilterBox extends React.Component {
         let filterSelect = null;
         if (dataFilters.length > 0) {
           filterSelect = (
-              <FormControl key={i} className={classes.formControl}>
+              <FormControl className={classes.formControl}>
                   <InputLabel htmlFor="filterSelect">Filters</InputLabel>
                   <select onChange={this.handleFilterSelect} name='filterSelect' id='filterSelect'>
                       <option value="" selected={this.state.selected === null}>Choose a filter</option>
