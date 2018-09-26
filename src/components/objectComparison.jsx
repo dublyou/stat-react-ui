@@ -38,6 +38,8 @@ import { getUrl, getImage } from '../utils/url';
 import toTitleCase from '../utils/toTitleCase';
 import getRanges from '../utils/helpers';
 
+axios.defaults.xsrfCookieName = 'csrftoken'
+axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 
 const styles = theme => ({
   root: {
