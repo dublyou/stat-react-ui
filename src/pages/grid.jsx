@@ -30,9 +30,9 @@ function getItem(type, args, other) {
       return <Headlines {...args}/>;
     case "twitter":
       const body = document.getElementsByTagName('body');
-      if (body !== undefined) {
+      if (body !== undefined && body.length === 1) {
         const widgetCSS = ".timeline-Widget{background-color: #303030;}";
-        body.addEventListener('load', () => {
+        body[0].addEventListener('load', () => {
           var widget = document.getElementById("twitter-widget-0");
           if (widget !== undefined) {
             var w = widget.contentDocument;
