@@ -29,6 +29,20 @@ function getItem(type, args, other) {
     case "headlines":
       return <Headlines {...args}/>;
     case "twitter":
+      const body = document.getElementsByTagName('body');
+      if (body !== undefined) {
+        const widgetCSS = ".timeline-Widget{background-color: #303030;}";
+        body.addEventListener('load', () => {
+          var widget = document.getElementById("twitter-widget-0");
+          if (widget !== undefined) {
+            var w = widget.contentDocument;
+            var s = document.createElement("style");
+            s.innerHTML = widgetCSS;
+            s.type = "text/css";
+            w.head.appendChild(s);
+          }
+        });
+      }
       return <Paper style={{margin: ".5rem"}}><a class="twitter-timeline" data-theme="dark" data-link-color="#F5F8FA" href={args.href}>Tweets by {args.handle}</a></Paper>;
   	default:
   		return <p>Error: Item type does not exist</p>

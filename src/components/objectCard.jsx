@@ -75,10 +75,10 @@ class ObjectCard extends React.Component {
         const { classes, image, name, subheader, url, handleCloseClick, handleFilterClick } = this.props;
         const actions = [];
         if (handleCloseClick !== undefined) {
-            actions.push(<IconButton key='filter' className={classes.iconButton} onClick={handleCloseClick}><CloseIcon className={classes.icon}/></IconButton>);
+            actions.push(<IconButton key='close' className={classes.iconButton} onClick={handleCloseClick}><CloseIcon className={classes.icon}/></IconButton>);
         }
         if (handleFilterClick !== undefined) {
-            actions.push(<IconButton key='close' className={classes.iconButton} onClick={handleFilterClick}><FilterListIcon className={classes.icon}/></IconButton>);
+            actions.push(<IconButton key='filter' className={classes.iconButton} onClick={handleFilterClick}><FilterListIcon className={classes.icon}/></IconButton>);
         }
         return (
             <Card onMouseEnter={this.handleMouseEnter} onMouseLeave={this.handleMouseLeave}>

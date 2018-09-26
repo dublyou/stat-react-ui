@@ -16,11 +16,10 @@ const styles = theme => ({
 
 class SimplePage extends React.Component {
   getContent(props) {
-    const { url, type, args, ...other } = props;
-    let { data } = props;
+    const { type, ...other } = props;
     switch(type) {
       case 'datatable': {
-        return <DataTable url={url} data={data} {...args}></DataTable>;
+        return <DataTable {...other}></DataTable>;
       }
       case 'comparison': {
         return <Comparison {...other}></Comparison>;

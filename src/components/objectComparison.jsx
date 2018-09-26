@@ -19,12 +19,12 @@ import IconButton from '@material-ui/core/IconButton';
 import InputLabel from '@material-ui/core/InputLabel';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import Paper from '@material-ui/core/Paper';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
-import Paper from '@material-ui/core/Paper';
+import Switch from '@material-ui/core/Switch';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -32,9 +32,11 @@ import ObjectCard from './objectCard';
 import MultiSelect from './multiSelect';
 import SearchBar from './searchBar';
 import SimpleList from './simpleList';
+import TableCell from './tableCell'
 import axios from 'axios';
 import { getUrl, getImage } from '../utils/url';
 import toTitleCase from '../utils/toTitleCase';
+import getRanges from '../utils/helpers';
 
 
 const styles = theme => ({
@@ -117,6 +119,9 @@ const styles = theme => ({
     marginLeft: 0,
     marginRight: ".5rem",
   },
+  switch: {
+    marginLeft: '.5rem',
+  },
   table: {
     width: "auto",
     margin: "auto"
@@ -141,34 +146,6 @@ const styles = theme => ({
       cursor: "pointer",
     },
   },
-  tableCell: {
-    padding: ".5rem",
-    textAlign: "left",
-    fontSize: "1rem",
-    backgroundColor: theme.palette.background.default,
-    position: "relative",
-    borderBottom: "none",
-    "&:hover": {
-      cursor: "pointer",
-      backgroundColor: theme.palette.grey[900],
-      color: theme.palette.primary.main,
-    },
-    "&:last-child": {
-      paddingRight: ".5rem"
-    }
-  },
-  tableBodyCell: {
-    color: theme.palette.grey[800],
-    fontSize: "1.25rem",
-    textAlign: "center",
-    paddingLeft: ".5rem",
-    paddingRight: ".5rem",
-    borderBottom: "none",
-    whiteSpace: "nowrap",
-    "&:last-child": {
-      paddingRight: ".5rem"
-    }
-  },
   container: {
     maxHeight: 500,
     overflow: "auto",
@@ -186,26 +163,43 @@ class Comparison extends React.Component {
       display: "horizontal",
       dragObject: null,
       dragField: null,
-      selectFilters: {},
-      filterOpen: false,
+      objectFilters: {},
+      showFilterOptions: false,
+      showFilters: true,
     };
   }
 
-  addObject = (obj) => {
-    let { objects, ordering } = this.state;
-    objects[obj.id] = obj;
-    if (ordering.indexOf(obj.id) === -1) {
-      ordering.push(obj.id);
+  addObject = (obj, filters=null) => {
+    let { objects, objectFilters, ordering } = this.state;
+    let key = obj.key;
+    if (key === undefined) {
+      let i = 1;
+      while (true) {
+        key = `${obj.id}-${i}`;
+        if (ordering.indexOf(key) === -1) {
+          ordering.push(key);
+          obj.key = key;
+          objects[key] = obj;
+          break;
+        }
+        i++;
+      }
+    } else {
+      objects[key] = obj;
     }
-    this.setState({ objects, ordering });
+    if (filters !== null) {
+      objectFilters[key] = filters;
+    }
+    this.setState({ objects, objectFilters, ordering });
   };
 
-  removeObject = (id) => (e) => {
+  removeObject = (key) => (e) => {
     e.preventDefault();
-    let { objects, ordering } = this.state;
-    delete objects[id];
-    ordering.splice(ordering.indexOf(id), 1)
-    this.setState({ objects, ordering });
+    let { objects, objectFilters, ordering } = this.state;
+    delete objects[key];
+    delete objectFilters[key];
+    ordering.splice(ordering.indexOf(key), 1)
+    this.setState({ objects, objectFilters, ordering });
   };
 
   handleClick = (obj) => {
@@ -213,43 +207,68 @@ class Comparison extends React.Component {
     const { ordering } = this.state;
     if (filterOptionsUrl !== undefined) {
       this.retrieveObjectFilterOptions(obj);
-    } else if (ordering.indexOf(obj.id) === -1) {
+    } else if (ordering.indexOf(obj.key) === -1) {
       this.retrieveObjectData(obj);
     }
   };
 
   retrieveObjectFilterOptions = (obj) => {
-    let { filterOptionsUrl } = this.props;
-    let url = getUrl(filterOptionsUrl, { id: obj.id });
-    axios.get(url).then(res => {
-      return res.data;
-    }).catch(error => {
-      return null;
-    }).then(filters => this.setState({ filters, selectedFilters: filters, filterOpen: true, selectedObj: obj }));
-  };
-
-  retrieveObjectData = (obj, filters = null, fields = null) => {
-    let { url = '/players/data/[=fields=]/[=id=]/' } = this.props;
-    fields = fields || this.state.fields;
-    if (fields.length === 0) {
-      this.addObject(obj);
+    const { objectFilters } = this.state;
+    if (obj.key !== undefined && objectFilters[obj.key] !== undefined) {
+      const { selected, possible } = objectFilters[obj.key];
+      this.setState({possibleFilters: possible, selectedFilters: selected, showFilterOptions: true, selectedObj: obj })
     } else {
-      url = getUrl(url, { id: obj.id, fields: fields.join("-") });
-      if (filters !== null) {
-        for (let filter in filters) {
-          url += `${filter}=${filters.join("-")}/`;
-        }
-      }
+      let { filterOptionsUrl } = this.props;
+      let url = getUrl(filterOptionsUrl, { id: obj.id });
       axios.get(url).then(res => {
         return res.data;
       }).catch(error => {
         return null;
-      }).then(data => {
-        if (data !== null) {
-          data = Object.assign(data, obj);
-          this.addObject(data);
-        }
+      }).then(filters => {
+        this.setState({ possibleFilters: filters, selectedFilters: {...filters}, showFilterOptions: true, selectedObj: obj });
       });
+    }
+  };
+
+  retrieveObjectData = (obj, filters=null, fields=null) => {
+    let { url, retrieveMethod='post' } = this.props;
+    const { objectFilters } = this.state;
+    filters = (objectFilters[obj.key] === undefined || filters !== null) ? filters : objectFilters[obj.key];
+    fields = fields || this.state.fields;
+    if (fields.length === 0) {
+      this.addObject(obj, filters);
+    } else {
+      if (retrieveMethod === 'post') {
+        axios.post(getUrl(url, { id: obj.id}), {
+          fields: JSON.stringify(fields),
+          filters: JSON.stringify(filters !== null ? filters.selected : {}),
+        }).then(res => {
+          return res.data;
+        }).catch(error => {
+          return null;
+        }).then(data => {
+          if (data !== null) {
+            this.addObject({...obj, ...data }, filters);
+          }
+        });
+      } else {
+        url = getUrl(url, { id: obj.id, fields: fields.join("-") });
+        if (filters !== null) {
+          const { selected } = filters;
+          for (let filterKey in selected) {
+            url += `${filterKey}=${selected[filterKey].join("-")}/`;
+          }
+        }
+        axios.get(url).then(res => {
+          return res.data;
+        }).catch(error => {
+          return null;
+        }).then(data => {
+          if (data !== null) {
+            this.addObject({...obj, ...data }, filters);
+          }
+        });
+      }
     }
   };
 
@@ -259,9 +278,9 @@ class Comparison extends React.Component {
     });
   };
 
-  handleObjectDrag = (id) => () => {
+  handleObjectDrag = (key) => () => {
     const { ordering } = this.state;
-    this.setState({ dragObject: { value: id, start: ordering.indexOf(id) } });
+    this.setState({ dragObject: { key, start: ordering.indexOf(key) } });
   };
 
   handleFieldDrag = (field) => () => {
@@ -274,12 +293,12 @@ class Comparison extends React.Component {
   };
 
   handleFieldChange = event => {
-    const { objects } = this.state;
+    const { objects, objectFilters } = this.state;
     let fields = event.target.value;
-    for (let id in objects) {
+    for (let key in objects) {
       for (let field in fields) {
-        if (objects[id][field] === undefined) {
-          this.retrieveObjectData(objects[id], null, fields);
+        if (objects[key][field] === undefined) {
+          this.retrieveObjectData(objects[key], objectFilters[key], fields);
           break;
         }
       }
@@ -288,11 +307,11 @@ class Comparison extends React.Component {
   };
 
   handleAddField = (field) => () => {
-    let { objects, fields } = this.state;
+    let { objects, objectFilters, fields } = this.state;
     fields.push(field);
-    for (let id in objects) {
-      if (objects[id][field] === undefined) {
-        this.retrieveObjectData(objects[id], null, fields);
+    for (let key in objects) {
+      if (objects[key][field] === undefined) {
+        this.retrieveObjectData(objects[key], objectFilters[key], fields);
       }
     }
     this.setState({ fields });
@@ -312,13 +331,13 @@ class Comparison extends React.Component {
     this.setState({ fields });
   }
 
-  handleObjectDragEnter = (id) => () => {
+  handleObjectDragEnter = (key) => () => {
     let { ordering, dragObject } = this.state;
-    if (dragObject !== null && id !== dragObject.value) {
-      let current = ordering.indexOf(dragObject.value);
-      let target = ordering.indexOf(id);
-      ordering[current] = id;
-      ordering[target] = dragObject.value;
+    if (dragObject !== null && key !== dragObject.key) {
+      let current = ordering.indexOf(dragObject.key);
+      let target = ordering.indexOf(key);
+      ordering[current] = key;
+      ordering[target] = dragObject.key;
       this.setState({ ordering });
     }
   };
@@ -338,19 +357,25 @@ class Comparison extends React.Component {
     this.retrieveObjectFilterOptions(obj);
   }
 
-  handleFilterChange = (filter) => (event) => {
+  handleFilterChange = (filter) => (event, new_value=null) => {
     let { selectedFilters } = this.state;
-    selectedFilters[filter] = event.target.value;
+    new_value = new_value || event.target.value;
+    selectedFilters[filter] = Array.isArray(new_value) ? new_value : [new_value];
     this.setState({ selectedFilters });
   };
 
   handleFilterAdd = (obj, filters) => () => {
     this.retrieveObjectData(obj, filters);
+    this.handleFilterClose();
   };
 
   handleFilterClose = () => {
-    this.setState({ filterOpen: false });
+    this.setState({ showFilterOptions: false });
   };
+
+  handleShowFiltersChange = () => {
+    this.setState({showFilters: !this.state.showFilters});
+  }
 
   handleScroll = () => {
     let th = this.container.current.querySelector("thead>tr>th:first-child")
@@ -368,46 +393,77 @@ class Comparison extends React.Component {
     }
   };
 
+  getFilterKeys = (objectFilters) => {
+    let filterKeys = [];
+    for (let objKey in objectFilters) {
+      let objFilters = objectFilters[objKey].selected;
+      if (objFilters !== undefined) {
+        for (let filterKey in objFilters) {
+          if (filterKeys.indexOf(filterKey) === -1) {
+            filterKeys.push(filterKey);
+          }
+        }
+      }
+    }
+    return filterKeys;
+  };
+
+  getFilterDisplay = (props, values, possibleValues=null) => {
+    const { continuous=false } = props;
+    if (values.length === possibleValues.length && values.length > 0) {
+      return 'All' + (continuous ? ` (${getRanges(values, possibleValues)})` : '');
+    } else if (values.length > 1) {
+      let display = continuous ? getRanges(values, possibleValues) : values;
+      return display.map(value => toTitleCase(value)).join(', ');
+    } else {
+      return values;
+    }
+  };
+
   getObjectHeader = (ordering, objects, fields, addFieldButton) => {
     const { classes } = this.props;
     let cells = [];
-    const fieldMenu = this.getFieldMenu(fields, addFieldButton)
+    const fieldMenu = <TableCell component='th' style={{zIndex: 2}} key='add-field'>{this.getFieldMenu(fields, addFieldButton)}</TableCell>;
     if (ordering.length !== 2) {
-      cells.push(<TableCell style={{zIndex: 2}} key='add-field' className={classes.tableCell}>{fieldMenu}</TableCell>);
+      cells.push(fieldMenu);
     }
     for (let i = 0; i < ordering.length; i++) {
-      let id = ordering[i];
-      let obj = objects[id]
+      let key = ordering[i];
+      let obj = objects[key]
       if (i === 1 && ordering.length === 2) {
-        cells.push(<TableCell style={{zIndex: 2}} key={i} className={classes.tableCell}>{fieldMenu}</TableCell>);
+        cells.push(fieldMenu);
       }
       cells.push(
         <TableCell
-          key={id}
+          key={key}
           component="th"
-          className={classes.tableCell}
           draggable={true}
-          onDragEnter={this.handleObjectDragEnter(id)}
-          onDragStart={this.handleObjectDrag(id)}
+          onDragEnter={this.handleObjectDragEnter(key)}
+          onDragStart={this.handleObjectDrag(key)}
           onDragEnd={this.handleDragEnd("Object")}>
-          <ObjectCard handleCloseClick={this.removeObject(id)} handleFilterClick={this.handleEditObjectFilters(obj)} {...obj}/>
+          <ObjectCard handleCloseClick={this.removeObject(key)} handleFilterClick={this.handleEditObjectFilters(obj)} {...obj}/>
         </TableCell>);
     }
     return <TableRow className={classes.tableHeadRow}>{cells}</TableRow>;
   };
 
-  getFieldHeader = (fields, addFieldButton) => {
-    const { classes } = this.props;
+  getFieldHeader = (fields, addFieldButton, filterKeys) => {
+    const { classes, filterFields } = this.props;
     return (
       <TableRow className={classes.tableHeadRow}>
-        <TableCell style={{zIndex: 2}} className={classes.tableCell} component="th">{this.getFieldMenu(fields, addFieldButton)}</TableCell>
+        <TableCell style={{zIndex: 2}} component="th">{this.getFieldMenu(fields, addFieldButton)}</TableCell>
+        {filterKeys.map(filterKey => {
+          const filterProps = filterFields[filterKey];
+          const filterLabel = (filterProps.label !== undefined) ? filterProps.label : toTitleCase(filterKey);
+          return <TableCell key={filterKey} style={{zIndex: 2}} component="th">{filterLabel}</TableCell>})}
         {fields.map((f, i) => {
           return (
             <TableCell
               key={i}
+              actionType='close'
+              handleActionClick={this.handleFieldDoubleClick(f)}
               component="th"
-              className={classes.tableCell}
-              onDoubleClick={this.handleFieldDoubleClick(f)}
+              clickable={true}
               draggable={true}
               onDragEnter={this.handleFieldDragEnter(f)}
               onDragStart={this.handleFieldDrag(f)}
@@ -419,45 +475,74 @@ class Comparison extends React.Component {
     );
   };
 
-  getObjectRow = (obj, fields) => {
-    const { classes } = this.props;
+  getObjectRow = (obj, fields, filters, filterKeys) => {
+    const { classes, filterFields } = this.props;
     return (
-      <TableRow key={obj.id} className={classes.tableRow} draggable={true} onDragEnter={this.handleObjectDragEnter(obj.id)} onDragStart={this.handleObjectDrag(obj.id)} onDragEnd={this.handleDragEnd("Object")}>
-        <TableCell className={classes.tableCell} component="th">
-          <ObjectCard handleCloseClick={this.removeObject(obj.id)} handleFilterClick={this.handleEditObjectFilters(obj)} {...obj}/>
+      <TableRow key={obj.key} className={classes.tableRow} draggable={true} onDragEnter={this.handleObjectDragEnter(obj.key)} onDragStart={this.handleObjectDrag(obj.key)} onDragEnd={this.handleDragEnd("Object")}>
+        <TableCell component="th">
+          <ObjectCard handleCloseClick={this.removeObject(obj.key)} handleFilterClick={this.handleEditObjectFilters(obj)} {...obj}/>
         </TableCell>
-        {fields.map((f, i) => <TableCell key={i} style={{ textAlign: "left" }} className={classes.tableBodyCell}>{obj[f]}</TableCell>)}
+        {filterKeys.map(filterKey => {
+          const filterProps = filterFields[filterKey];
+          const { selected, possible } = filters;
+          return (
+            <TableCell key={`${obj.key}-${filterKey}`} component='th'>
+              {(selected[filterKey] === undefined) ? null : this.getFilterDisplay(filterProps, selected[filterKey], possible[filterKey])}
+            </TableCell>);})}
+        {fields.map((f, i) => <TableCell key={i}>{obj[f]}</TableCell>)}
       </TableRow>
     );
+  };
+
+  getFilterRow = (filter, ordering, objectFilters) => {
+    const { classes, filterFields } = this.props;
+    const filterProps = filterFields[filter];
+    const filterLabel = (filterProps.label !== undefined) ? filterProps.label : toTitleCase(filter);
+    let cells = [];
+    const labelCell = (styles) => <TableCell styles={styles} key={`${filter}-filter`} component='th'>{filterLabel}</TableCell>;
+    if (ordering.length !== 2) {
+      cells.push(labelCell({zIndex: 2}));
+    }
+    for (let i = 0; i < ordering.length; i++) {
+      const objKey = ordering[i];
+      const { selected, possible } = objectFilters[objKey];
+      if (ordering.length === 2) {
+        if (i === 1) {
+          cells.push(labelCell({zIndex: 2, textAlign: 'center'}));
+        }
+        cells.push(<TableCell key={`${objKey}-${filter}`} styles={{ textAlign: 'center' }} component='th'>{(selected[filter] === undefined) ? null : this.getFilterDisplay(filterProps, selected[filter], possible[filter])}</TableCell>);
+      } else {
+        cells.push(<TableCell key={`${objKey}-${filter}`} component='th'>{(selected[filter] === undefined) ? null : this.getFilterDisplay(filterProps, selected[filter], possible[filter])}</TableCell>);
+      }
+    }
+    return <TableRow key={filter} className={classes.tableHeadRow}>{cells}</TableRow>;
   };
 
   getFieldRow = (field, ordering, objects) => {
     const { classes } = this.props;
     let cells = [];
+    const labelCell = (styles) => <TableCell styles={styles} key={`${field}-field`} clickable={true} component='th' actionType='close' handleActionClick={this.handleFieldDoubleClick(field)}>{toTitleCase(field)}</TableCell>;
     if (ordering.length !== 2) {
-      cells.push(
-        <TableCell
-          key={`1-${field}`}
-          className={classes.tableCell}
-          component="th"
-          onDoubleClick={this.handleFieldDoubleClick(field)}>
-          {toTitleCase(field)}
-        </TableCell>);
+      cells.push(labelCell());
     }
     for (let i = 0; i < ordering.length; i++) {
-      if (i === 1 && ordering.length === 2) {
-        cells.push(<TableCell key={`${i}-${field}`} style={{ textAlign: "center" }} className={classes.tableCell} component="th" onDoubleClick={this.handleFieldDoubleClick(field)}>{toTitleCase(field)}</TableCell>);
+      if (ordering.length === 2) {
+        if (i === 1) {
+          cells.push(labelCell({textAlign: 'center'}));
+        }
+        cells.push(<TableCell key={i} styles={{ textAlign: 'center' }}>{objects[ordering[i]][field]}</TableCell>);
+      } else {
+        cells.push(<TableCell key={i}>{objects[ordering[i]][field]}</TableCell>);
       }
-      cells.push(<TableCell key={i} className={classes.tableBodyCell}>{objects[ordering[i]][field]}</TableCell>);
     }
     return <TableRow key={field} className={classes.tableRow} draggable={true} onDragEnter={this.handleFieldDragEnter(field)} onDragStart={this.handleFieldDrag(field)} onDragEnd={this.handleDragEnd("Field")}>{cells}</TableRow>;
   };
 
   getObjectCardHeader = (obj) => {
     const { classes, subheader } = this.props;
-    const action = <IconButton className={classes.deleteBtn} onClick={this.removeObject(obj.id)}><CloseIcon className={classes.closeIcon} /></IconButton>;
+    const action = <IconButton className={classes.deleteBtn} onClick={this.removeObject(obj.key)}><CloseIcon className={classes.closeIcon} /></IconButton>;
     return (
-      <Card onDoubleClick={this.removeObject(obj.id)}>
+      <Card onDoubleClick={this.removeObject(obj.key)}>
         <CardHeader
           className={classes.cardHeader}
           action={action}
@@ -476,7 +561,7 @@ class Comparison extends React.Component {
       <Chip
         avatar={<Avatar alt={obj.name} src={getImage(obj.image)} />}
         label={obj.name}
-        onDelete={this.removeObject(obj.id)}
+        onDelete={this.removeObject(obj.key)}
         className={classes.chip}
         component="a"
         href={obj.url}
@@ -492,7 +577,7 @@ class Comparison extends React.Component {
     //const action = <IconButton onClick={this.removeObject(id)}><CloseIcon /></IconButton>;
     return (
       <Card className={classes.card}
-        onDoubleClick={this.removeObject(obj.id)}
+        onDoubleClick={this.removeObject(obj.key)}
         draggable={true}
         onDragEnter={this.handleObjectDragEnter(id)}
         onDragStart={this.handleObjectDrag(id)}
@@ -510,7 +595,7 @@ class Comparison extends React.Component {
   };
 
   getFieldMenu = (fields, addFieldButton) => {
-    const { classes, comparison_fields } = this.props;
+    const { classes, comparisonFields } = this.props;
     return (
       <div className={classes.fieldMenu}>
         <Button
@@ -528,7 +613,7 @@ class Comparison extends React.Component {
           onClose={this.handleAddFieldClose}
           style={{ maxHeight: 325 }}
         >
-          {comparison_fields
+          {comparisonFields
             .filter(value => fields.indexOf(value) === -1)
             .map(f => <MenuItem key={f} className={classes.fieldMenuItem} onClick={this.handleAddField(f)}>{toTitleCase(f)}</MenuItem>)}
         </Menu>
@@ -564,23 +649,31 @@ class Comparison extends React.Component {
   };
 
   render() {
-    const { classes, search, filterFields = [] } = this.props;
-    const { ordering, objects, addFieldButton, fields, display, filters, selectedObj, selectedFilters } = this.state;
+    const { classes, filterFields, search } = this.props;
+    const { ordering, objects, objectFilters, addFieldButton, fields, 
+            display, selectedObj, selectedFilters, possibleFilters, showFilters } = this.state;
     let content = <Paper className={classes.defaultContent}>{this.getFieldMenu(fields, addFieldButton)}</Paper>;
     let filterBox = null;
+    let filterKeys = this.getFilterKeys(objectFilters);
+    let showFiltersSwitch = filterKeys.length > 0 ? <FormControlLabel className={classes.switch} control={<Switch color="primary" onChange={this.handleShowFiltersChange} checked={showFilters}/>} label='Show Filters' labelPlacement='start'/> : null;
+    filterKeys = showFilters ? filterKeys : [];
+
     if (display === "cards") {
       content = <div className={classes.cardContainer}>{ordering.map(id => this.getObjectCard(id, objects[id], fields))}</div>;
     } else if (display === "horizontal") {
       content = <div className={classes.container} ref={this.container} onScroll={this.handleScroll}>
           <Table className={classes.table}>
-            <TableHead>{this.getFieldHeader(fields, addFieldButton)}</TableHead>
-            <TableBody>{ordering.map(id => this.getObjectRow(objects[id], fields))}</TableBody>
+            <TableHead>{this.getFieldHeader(fields, addFieldButton, filterKeys)}</TableHead>
+            <TableBody>{ordering.map(id => this.getObjectRow(objects[id], fields, objectFilters[id], filterKeys))}</TableBody>
           </Table>
         </div>;
     } else if (display === "vertical") {
       content = <div className={classes.container} ref={this.container} onScroll={this.handleScroll}>
         <Table className={classes.table}>
-          <TableHead>{this.getObjectHeader(ordering, objects, fields, addFieldButton)}</TableHead>
+          <TableHead>
+            {this.getObjectHeader(ordering, objects, fields, addFieldButton)}
+            {filterKeys.map(f => this.getFilterRow(f, ordering, objectFilters))}
+          </TableHead>
           <TableBody>{fields.map(field => this.getFieldRow(field, ordering, objects))}</TableBody>
         </Table>
       </div>;
@@ -589,19 +682,19 @@ class Comparison extends React.Component {
     if (selectedFilters !== undefined) {
       filterBox = (
         <Dialog
-          open={this.state.filterOpen}
+          open={this.state.showFilterOptions}
           onClose={this.handleClose}
           aria-labelledby="form-dialog-title"
         >
           <DialogTitle id="form-dialog-title">Data Filters</DialogTitle>
           <DialogContent>
-            {filterFields.map(f => <MultiSelect key={`filter-${f}`} selectedFields={selectedFilters[f]} possibleFields={filters[f]} handleChange={this.handleFilterChange(f)} />)}
+            {Object.keys(filterFields).map(f => <MultiSelect key={`filter-${f}`} label={f} selectedFields={selectedFilters[f]} possibleFields={possibleFilters[f]} handleChange={this.handleFilterChange(f)} continuous={filterFields[f].continuous}/>)}
           </DialogContent>
           <DialogActions>
             <Button onClick={this.handleFilterClose} color="primary">
               Cancel
               </Button>
-            <Button onClick={this.handleFilterAdd(selectedObj, selectedFilters)} color="primary">
+            <Button onClick={this.handleFilterAdd(selectedObj, {possible: possibleFilters, selected: selectedFilters})} color="primary">
               Add
             </Button>
           </DialogActions>
@@ -613,6 +706,7 @@ class Comparison extends React.Component {
         <Toolbar className={classes.groupHeader}>
           {this.getDisplayOptions(display)}
           <SearchBar {...search} handleClick={this.handleClick} growOnFocus={false} width={"auto"} placeholder="Add a player..." />
+          {showFiltersSwitch}
         </Toolbar>
         {content}
         {filterBox}
