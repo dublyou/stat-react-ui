@@ -242,8 +242,8 @@ class Comparison extends React.Component {
     } else {
       if (retrieveMethod === 'post') {
         axios.post(getUrl(url, { id: obj.id}), {
-          fields: JSON.stringify(fields),
-          filters: JSON.stringify(filters !== null ? filters.selected : {}),
+          fields: fields,
+          filters: filters !== null ? filters.selected : {},
         }).then(res => {
           return res.data;
         }).catch(error => {
