@@ -23,10 +23,6 @@ const styles = theme => ({
     cardHeaderAvatar: {
         marginRight: ".5rem",
     },
-    avatar: {
-        width: "3rem",
-        height: "3rem",
-    },
     cardHeaderContent: {
         marginRight: ".5rem",
         textDecoration: "none",
@@ -72,8 +68,16 @@ class ObjectCard extends React.Component {
     };
 
     render() {
-        const { classes, image, name, subheader, url, handleCloseClick, handleFilterClick } = this.props;
+        const { classes, image, name, subheader, url, handleCloseClick, handleFilterClick, condense=true } = this.props;
         const actions = [];
+        const avatarSize = {
+            width: "3rem",
+            height: "3rem",
+        }
+        if (condense) {
+            avatarSize.width = '1.5rem';
+            avatarSize.height = '1.5rem';
+        }
         if (handleCloseClick !== undefined) {
             actions.push(<IconButton key='close' className={classes.iconButton} onClick={handleCloseClick}><CloseIcon className={classes.icon}/></IconButton>);
         }
@@ -84,12 +88,12 @@ class ObjectCard extends React.Component {
             <Card onMouseEnter={this.handleMouseEnter} onMouseLeave={this.handleMouseLeave}>
                 <CardHeader
                     className={classes.cardHeader}
-                    action={(actions.length > 0) ? <span style={{visibility: 'hidden', display: 'flex', flexDirection: 'column'}} ref={this.action}>{actions}</span> : null}
-                    avatar={<Avatar className={classes.avatar} alt={name} src={getImage(image)} />}
+                    action={(actions.length > 0) ? <span style={{visibility: 'hidden', display: 'flex', flexDirection: condense ? 'row' : 'column'}} ref={this.action}>{actions}</span> : null}
+                    avatar={<Avatar style={avatarSize} alt={name} src={getImage(image)} />}
                     classes={{ avatar: classes.cardHeaderAvatar, action: classes.cardHeaderAction, title: classes.cardHeaderContent }}
                     title={name || null}
                     titleTypographyProps={{ component: "a", href: url, target: "_blank", noWrap: true}}
-                    subheader={subheader || null}
+                    subheader={(condense ? null : subheader) || null}
                     subheaderTypographyProps={{noWrap: true}}
                 />
             </Card>

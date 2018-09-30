@@ -2,7 +2,8 @@ import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import CloseIcon from '@material-ui/icons/Close';
 import IconButton from '@material-ui/core/IconButton';
-import MuiTableCell from '@material-ui/core/TableCell';
+import TableCell from '@material-ui/core/TableCell';
+import get from 'lodash/get';
 
 
 const styles = theme => ({
@@ -62,7 +63,7 @@ const styles = theme => ({
     },
 });
 
-class TableCell extends React.Component {
+class DataTableCell extends React.Component {
     constructor(props) {
         super(props);
         this.action = React.createRef();
@@ -96,14 +97,15 @@ class TableCell extends React.Component {
         const { classes, clickable, component } = this.props;
         const { tableCell, tableHeadCell, tableBodyCell } = classes;
         if (component === 'th') {
-            return clickable ? tableHeadCell : tableCell;
+            return `${clickable ? tableHeadCell : tableCell}`;
         } else {
-            return tableBodyCell;
+            return `${tableBodyCell}`;
         }
     };
 
     getStyles = () => {
         const { styles={}, children } = this.props;
+        styles.whiteSpace = get(styles, 'whitespace', 'nowrap');
         if (styles.textAlign === undefined) {
             if (typeof children === 'number') {
                 styles.textAlign = 'right';
@@ -117,19 +119,19 @@ class TableCell extends React.Component {
     };
 
     render() {
-        const { classes, children, clickable, styles, actionType=null, handleActionClick, ...other } = this.props;
+        const { classes,  className='', children, clickable, styles, actionType=null, handleActionClick, ...other } = this.props;
         const action = (actionType !== null) ? <span className={classes.action} ref={this.action}>{this.getActionButton(actionType)}</span> : null;
 
         return (
-            <MuiTableCell 
+            <TableCell 
                 style={this.getStyles()} 
-                className={this.getClassName()} 
+                className={`${this.getClassName()} ${className}`} 
                 onMouseEnter={actionType === null ? null : this.handleMouseEnter} 
                 onMouseLeave={actionType === null ? null : this.handleMouseLeave} 
                 {...other}>
                 {children}{action}
-            </MuiTableCell>);
+            </TableCell>);
     }
 }
 
-export default withStyles(styles)(TableCell);
+export default withStyles(styles)(DataTableCell);
