@@ -1,5 +1,6 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
+import Chips from './chips';
 import CustomCard from './customCard';
 import Expand from './expand';
 import SelectMenu from './selectMenu';

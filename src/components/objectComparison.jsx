@@ -691,7 +691,7 @@ class Comparison extends React.Component {
               Cancel
               </Button>
             <Button onClick={this.handleFilterAdd(selectedObj, {possible: possibleFilters, selected: selectedFilters})} color="primary">
-              Add
+              Done
             </Button>
           </DialogActions>
         </Dialog>);
