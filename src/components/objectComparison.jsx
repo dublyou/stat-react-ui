@@ -701,10 +701,10 @@ class Comparison extends React.Component {
       <div className={classes.root}>
         <Toolbar className={classes.groupHeader}>
           <Grid container spacing={8}>
-            <Grid item xs={12} sm={12} md={6}>
+            <Grid item xs={12} sm={12} md={4}>
               <SearchBar {...search} handleClick={this.handleClick} growOnFocus={false} width={"auto"} placeholder="Add a player..." />
             </Grid>
-            <Grid item xs={12} sm={12} md={6} className={classes.options}>
+            <Grid item xs={12} sm={12} md={8} className={classes.options}>
               {this.getDisplayOptions(display)}
               <div>
                 {showFiltersSwitch}
