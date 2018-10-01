@@ -107,7 +107,7 @@ class DataTableCell extends React.Component {
         const { styles={}, children } = this.props;
         styles.whiteSpace = get(styles, 'whitespace', 'nowrap');
         if (styles.textAlign === undefined) {
-            if (typeof children === 'number') {
+            if (!isNaN(+children)) {
                 styles.textAlign = 'right';
             } else if (typeof children === 'string') {
                 if (/^(?:[\d\.]+\s*\%?|\$?\s*[\d,\.]+)$/.test()) {

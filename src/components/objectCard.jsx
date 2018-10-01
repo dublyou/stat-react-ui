@@ -16,7 +16,7 @@ const styles = theme => ({
         }
     },
     cardHeader: {
-        padding: ".5rem",
+        padding: ".2rem",
         display: "flex",
         
     },
@@ -32,8 +32,9 @@ const styles = theme => ({
         }
     },
     cardHeaderAction: {
-        marginRight: "-.25rem",
-        marginTop: "-.25rem",
+        position: 'absolute',
+        top: '1rem',
+        right: '2rem',
     },
     icon: {
         width: "1rem",
@@ -43,7 +44,7 @@ const styles = theme => ({
         width: "1.5rem",
         height: "1.5rem",
         backgroundColor: theme.palette.background.default,
-        margin: '.2rem',
+        margin: '.1rem',
     },
 })
 
@@ -75,8 +76,8 @@ class ObjectCard extends React.Component {
             height: "3rem",
         }
         if (condense) {
-            avatarSize.width = '1.5rem';
-            avatarSize.height = '1.5rem';
+            avatarSize.width = '2rem';
+            avatarSize.height = '2rem';
         }
         if (handleCloseClick !== undefined) {
             actions.push(<IconButton key='close' className={classes.iconButton} onClick={handleCloseClick}><CloseIcon className={classes.icon}/></IconButton>);

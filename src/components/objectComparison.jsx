@@ -102,6 +102,7 @@ const styles = theme => ({
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'center',
+    justifyContent: 'center',
     flex: '1 1 auto',
   },
   formControlRadio: {
@@ -443,7 +444,7 @@ class Comparison extends React.Component {
       let key = ordering[i];
       let obj = objects[key]
       if (i === 1 && ordering.length === 2) {
-        cells.push(<DataTableCell component='th' style={{zIndex: 2}} />);
+        cells.push(<DataTableCell key='blank' component='th' style={{zIndex: 2}} />);
       }
       cells.push(
         <DataTableCell
@@ -705,11 +706,6 @@ class Comparison extends React.Component {
               <SearchBar {...search} handleClick={this.handleClick} growOnFocus={false} width={"auto"} placeholder="Add a player..." />
             </Grid>
             <Grid item xs={12} sm={12} md={8} className={classes.options}>
-              {this.getDisplayOptions(display)}
-              <div>
-                {showFiltersSwitch}
-                <FormControlLabel className={classes.switch} control={<Switch color="primary" onChange={this.handleCondenseChange} checked={condense}/>} label='Condense'/>
-              </div>
               <div>
                 <Button
                   onClick={this.handleAddFieldClick}
@@ -717,6 +713,11 @@ class Comparison extends React.Component {
                 >
                   <Icon className={classes.icon} style={{marginRight: 2}}>add_circle</Icon>Add&nbsp;Field
                 </Button>
+              </div>
+              {this.getDisplayOptions(display)}
+              <div>
+                {showFiltersSwitch}
+                <FormControlLabel className={classes.switch} control={<Switch color="primary" onChange={this.handleCondenseChange} checked={condense}/>} label='Condense'/>
               </div>
             </Grid>
           </Grid>
