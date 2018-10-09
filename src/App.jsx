@@ -7,7 +7,7 @@ import SimplePage from './pages/simple';
 import GridPage from './pages/grid';
 import Navbar from './components/navbar';
 import './App.css';
-import sample_args from './sample_data/player_comparison';
+import sample_args from './sample_data/player_profile';
 /*draft, franchise_profile, team_profile, game_profile, player_profile, season_profile, standings, stats, 
 season_stat_leaders, alltime_stat_leaders, stat_rankings, season_stat_rankings, franchise_stat_rankings, home, player_comparison
 */

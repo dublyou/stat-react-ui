@@ -19,7 +19,8 @@ class SimplePage extends React.Component {
     const { type, ...other } = props;
     switch(type) {
       case 'datatable': {
-        return <DataTable {...other}></DataTable>;
+        const { args, url } = other;
+        return <DataTable {...args} url={url}></DataTable>;
       }
       case 'comparison': {
         return <Comparison {...other}></Comparison>;

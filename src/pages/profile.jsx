@@ -8,6 +8,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
+import { getImage } from '../utils/url';
 
 const styles = theme => ({
 	root: {
@@ -56,7 +57,7 @@ class QuickMenu extends React.Component {
           {options.map((value, i) => {
             let avatar = null;
             if (value.image !== undefined) {
-              avatar = <Avatar alt={value.label} src={value.image} className={classes.selectAvatar}/>
+              avatar = <Avatar alt={value.label} src={getImage(value.image)} className={classes.selectAvatar}/>
             }
             return <MenuItem className={classes.selectItem} component="a" href={value.href} key={i} value={value.label}>{avatar}<ListItemText>{value.label}</ListItemText></MenuItem>;
           })}

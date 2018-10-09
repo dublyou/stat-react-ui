@@ -38,7 +38,7 @@ import isArray from 'lodash/isArray';
 import get from 'lodash/get';
 import { getUrl, getImage } from '../utils/url';
 import toTitleCase from '../utils/toTitleCase';
-import getRanges from '../utils/helpers';
+import { getRanges } from '../utils/helpers';
 
 const styles = theme => ({
   root: {
@@ -711,7 +711,7 @@ class Comparison extends React.Component {
                   onClick={this.handleAddFieldClick}
                   color='primary'
                 >
-                  <Icon className={classes.icon} style={{marginRight: 2}}>add_circle</Icon>Add&nbsp;Field
+                  <Icon className={classes.icon} style={{marginRight: 2}}>edit</Icon>Edit&nbsp;Fields
                 </Button>
               </div>
               {this.getDisplayOptions(display)}

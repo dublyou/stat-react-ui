@@ -15,6 +15,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import FilterBox from './filterBox';
 import axios from 'axios';
+import { getUrl } from '../utils/url';
 
 const getCombos = (group_by, groups, combos=[], count=0) => {
     let labels = group_by;
@@ -46,38 +47,16 @@ function toTitleCase(str) {
     return str.replace(/_/g, " ").replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }
 
-function toCurrency(x) {
-    var dec_split = x.toString().split("."),
-        currency = "$",
-        len_b4_dec = dec_split[0].length,
-        remainder = len_b4_dec % 3,
-        num_commas;
-    if (remainder > 0) {
-        num_commas = Math.floor(len_b4_dec/3);
-        currency += dec_split[0].substr(0, remainder);
-    } else {
-        num_commas = (len_b4_dec/3) - 1;
-        currency += dec_split[0].substr(0, 3);
-    }
-    for (var i = 0; i < num_commas; i++) {
-        currency += "," + dec_split[0].substr(remainder + i * 3, 3);
-    }
-    if (dec_split.length > 1) {
-        currency += "." + dec_split[1];
-    }
-    return currency;
-}
-
 const styles = theme => ({
     root: {
         width: '100%',
-        marginTop: theme.spacing.unit,
         overflowX: 'auto',
         paddingBottom: 20,
     },
     table: {
         width: "auto",
-        margin: "auto"
+        margin: "auto",
+        transformStyle: 'preserve-3d',
     },
     tableHeadRow: {
         height: 30,
@@ -161,11 +140,6 @@ const styles = theme => ({
     buttonLabel: {
         textTransform: 'capitalize',
     },
-    container: {
-        maxHeight: 500,
-        overflow: "auto",
-        display: "inline-block",
-    },
     widthContainer: {
         width: "95%",
         margin: "auto",
@@ -222,7 +196,6 @@ class DataTable extends React.Component {
 
     constructor(props) {
         super(props);
-        this.heightContainers = [React.createRef()];
         this.widthContainers = [React.createRef()];
         this.fixedHeader = React.createRef();
     }
@@ -236,15 +209,29 @@ class DataTable extends React.Component {
     };
 
     componentDidMount() {
-        let header = this.fixedHeader.current;
-        if (header !== null) {
-            window.addEventListener('scroll', this.showFixedHeader(header.offsetTop));
-        }
+        var checkExist = setInterval(() => {
+            if (this.fixedHeader.current !== null) {
+                const elemRect = this.fixedHeader.current.getBoundingClientRect();
+                const startPos = elemRect.top - 64 + window.pageYOffset;
+                window.addEventListener('scroll', this.transformTableHeader(startPos));
+               clearInterval(checkExist);
+            }
+         }, 100);
     };
 
     componentWillUnmount() {
-        window.removeEventListener('scroll', this.showFixedHeader());
+        window.removeEventListener('scroll', this.transformTableHeader());
     }
+
+    transformTableHeader = (startPos) => () => {
+        if (this.fixedHeader.current !== null) {
+            if (window.pageYOffset > startPos) {
+                this.fixedHeader.current.style.transform = "translate3d(0px, " + (window.pageYOffset - startPos) + "px, 1px)";
+            } else {
+                this.fixedHeader.current.style.transform = 'none';
+            }
+        }
+    };
 
     getData = (filterValues) => {
         let { data, url, filters } = this.props;
@@ -263,7 +250,7 @@ class DataTable extends React.Component {
             }
         }
         if (url !== undefined) {
-            axios.get(url).then(res => {
+            axios.get(getUrl(url)).then(res => {
                 return res.data;
             }).catch(error => {
                 return (state_data.length > 0) ? state_data : data;
@@ -286,7 +273,6 @@ class DataTable extends React.Component {
             this.widthContainers = [];
             for (let s in splits) {
                 ordering = ordering.concat(splits[s]);
-                this.heightContainers.push(React.createRef());
                 this.widthContainers.push(React.createRef());
             }
         }
@@ -563,46 +549,18 @@ class DataTable extends React.Component {
         this.setState({ perPage: event.target.value });
     };
 
-    handleYScroll = (index) => () => {
-        const { freeze } = this.props;
-        let heightContainer = this.heightContainers[index].current;
-        let widthContainer = this.widthContainers[index].current;
-        let translate = "translate(" + widthContainer.scrollLeft + "px, " + heightContainer.scrollTop + "px)";
-        let translateY = "translateY(" + heightContainer.scrollTop + "px)";
-        let ths = heightContainer.querySelectorAll("th");
-        for (let i = 0; i < ths.length; i++) {
-            if (freeze !== undefined && i < freeze.length) {
-                ths[i].style.transform = translate;
-            } else {
-                ths[i].style.transform = translateY;
-            }
-        }
-    };
-
     handleXScroll = (index) => () => {
         const { freeze } = this.props;
         const { data } = this.state;
-        let heightContainer = this.heightContainers[index].current;
         let widthContainer = this.widthContainers[index].current;
-        let translate = "translate(" + widthContainer.scrollLeft + "px, " + heightContainer.scrollTop + "px)";
         let translateX = "translateX(" + widthContainer.scrollLeft + "px)";
         for (let c of (freeze || [])) {
-            let el = widthContainer.querySelector(`#${c}-0`);
-            if (el !== null) {
-                el.style.transform = translate;
-            }
-            for (let i = 1; i <= data.length + 1; i++) {
+            for (let i = 0; i <= data.length + 1; i++) {
                 let el = widthContainer.querySelector(`#${c}-${i}`);
                 if (el !== null) {
                     el.style.transform = translateX;
                 }
             }
-        }
-    };
-
-    showFixedHeader = (sticky) => () => {
-        if (window.pageYOffset >= sticky) {
-            this.fixedHeader.current.style.transform = "translate(0px, " + (window.pageYOffset - sticky) + "px)";
         }
     };
 
@@ -696,7 +654,6 @@ class DataTable extends React.Component {
             }
             if (addItem) {
                 items.push(row[group]);
-                this.heightContainers.push(React.createRef());
                 this.widthContainers.push(React.createRef());
             }
         }
@@ -753,7 +710,7 @@ class DataTable extends React.Component {
         }
         if (splits === undefined) {
             thead = (
-                <TableHead className={classes.tableHead} ref={this.fixedHeader}>
+            <TableHead className={classes.tableHead} component={(props) => <thead ref={this.fixedHeader}>{props.children}</thead>}>
                     <TableRow className={classes.tableHeadRow}>
                         {ordering.map((value, index) => {
                             let thProps = headProps[value] || {};
@@ -795,15 +752,13 @@ class DataTable extends React.Component {
                             <Typography className={classes.groupTitle} variant="title" color="inherit">{c[group_by[0]]}</Typography>
                         </Toolbar>
                         <div className={classes.widthContainer} ref={this.widthContainers[i]} onScroll={this.handleXScroll(i)}>
-                            <div className={classes.container} ref={this.heightContainers[i]} onScroll={this.handleYScroll(i)}>
-                                <Table className={classes.table}>
-                                    {thead}
-                                    <TableBody>
-                                        {this.getSections(groupData, ordering, columns)}
-                                        {totalRow}
-                                    </TableBody>
-                                </Table>
-                            </div>
+                            <Table className={classes.table}>
+                                {thead}
+                                <TableBody>
+                                    {this.getSections(groupData, ordering, columns)}
+                                    {totalRow}
+                                </TableBody>
+                            </Table>
                         </div>
                     </div>
                 );
@@ -851,16 +806,14 @@ class DataTable extends React.Component {
                             <Typography className={classes.groupTitle} variant="title">{s}</Typography>
                         </Toolbar>
                         <div className={classes.widthContainer} ref={this.widthContainers[i]} onScroll={this.handleXScroll(i)}>
-                            <div className={classes.container} ref={this.heightContainers[i]} onScroll={this.handleYScroll(i)}>
-                                <Table className={classes.table}>
-                                    {thead}
-                                    <TableBody>
-                                       {data.map((row, index) => this.getRow(row, index, splits[s], columns))}
-                                       {(totalData === null) ? null : this.getRow(totalData, data.length, splits[s], columns, true)}
-                                    </TableBody>
-                                    {footer}
-                                </Table>
-                            </div>
+                            <Table className={classes.table}>
+                                {thead}
+                                <TableBody>
+                                    {data.map((row, index) => this.getRow(row, index, splits[s], columns))}
+                                    {(totalData === null) ? null : this.getRow(totalData, data.length, splits[s], columns, true)}
+                                </TableBody>
+                                {footer}
+                            </Table>
                         </div>
                     </div>
                 );
@@ -885,16 +838,14 @@ class DataTable extends React.Component {
                     {condense_button}
                 </Toolbar>
                 <div className={classes.widthContainer} ref={this.widthContainers[0]} onScroll={this.handleXScroll(0)}>
-                    <div className={classes.container} ref={this.heightContainers[0]} onScroll={this.handleYScroll(0)}>
-        				<Table className={classes.table}>
-        					{thead}
-                            <TableBody>
-        					   {this.getSections(data, ordering, columns)}
-                               {totalRow}
-                            </TableBody>
-                            {footer}
-        				</Table>
-                    </div>
+                    <Table className={classes.table}>
+                        {thead}
+                        <TableBody>
+                            {this.getSections(data, ordering, columns)}
+                            {totalRow}
+                        </TableBody>
+                        {footer}
+                    </Table>
                 </div>
 		    </div>
 		);

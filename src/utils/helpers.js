@@ -1,5 +1,5 @@
 
-function getRanges(selected, fields) {
+export function getRanges(selected, fields) {
     let lbound = null;
     let ubound = null;
     let ranges = [];
@@ -28,4 +28,24 @@ function getRanges(selected, fields) {
     return ranges;
   };
 
-  export default getRanges
+  export function toCurrency(x) {
+    var dec_split = x.toString().split("."),
+        currency = "$",
+        len_b4_dec = dec_split[0].length,
+        remainder = len_b4_dec % 3,
+        num_commas;
+    if (remainder > 0) {
+        num_commas = Math.floor(len_b4_dec/3);
+        currency += dec_split[0].substr(0, remainder);
+    } else {
+        num_commas = (len_b4_dec/3) - 1;
+        currency += dec_split[0].substr(0, 3);
+    }
+    for (var i = 0; i < num_commas; i++) {
+        currency += "," + dec_split[0].substr(remainder + i * 3, 3);
+    }
+    if (dec_split.length > 1) {
+        currency += "." + dec_split[1];
+    }
+    return currency;
+}

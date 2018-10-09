@@ -1,11 +1,8 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
-import Avatar from '@material-ui/core/Avatar';
 import Card from '@material-ui/core/Card';
-import CardHeader from '@material-ui/core/CardHeader';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
-import Hidden from '@material-ui/core/Hidden';
 import Accordion from './accordion';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
@@ -15,9 +12,10 @@ import SummaryTable from './summaryTable';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
-import TableFooter from '@material-ui/core/TableFooter';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import { getImage } from '../utils/url';
+import { get } from 'http';
 
 const styles = theme => ({
   root: {
@@ -160,7 +158,7 @@ function getHeaderContent(props) {
 				content = content.concat(cards.map((card, index) => <CustomCard key={index} {...card}/>));
 			}
 			if (image !== undefined && image !== null) {
-				let cardMedia = <CardMedia key="profileMedia" className={classes.image} image={image} title={heading || "image"}/>;
+				let cardMedia = <CardMedia key="profileMedia" className={classes.image} image={getImage(image)} title={heading || "image"}/>;
 				if (image_caption !== undefined) {
 					let cardContent = (
 						<CardContent className={classes.profileContent}>
