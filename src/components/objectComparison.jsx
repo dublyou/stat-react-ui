@@ -37,8 +37,7 @@ import forIn from 'lodash/forIn';
 import isArray from 'lodash/isArray';
 import get from 'lodash/get';
 import { getUrl, getImage } from '../utils/url';
-import toTitleCase from '../utils/toTitleCase';
-import { getRanges } from '../utils/helpers';
+import { getRanges, toTitleCase } from '../utils/helpers';
 
 const styles = theme => ({
   root: {

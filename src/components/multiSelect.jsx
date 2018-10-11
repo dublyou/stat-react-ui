@@ -8,7 +8,7 @@ import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import ListItemText from '@material-ui/core/ListItemText';
 import Checkbox from '@material-ui/core/Checkbox';
-import toTitleCase from '../utils/toTitleCase';
+import { toTitleCase } from '../utils/helpers';
 
 const styles = theme => ({
   formControl: {

@@ -6,7 +6,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 import Radio from '@material-ui/core/Radio';
-import toTitleCase from '../utils/toTitleCase';
+import { toTitleCase } from '../utils/helpers';
 import union from 'lodash/union';
 import pullAll from 'lodash/pullAll';
 

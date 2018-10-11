@@ -94,10 +94,10 @@ class DataTableCell extends React.Component {
     };
 
     getClassName = () => {
-        const { classes, clickable, component } = this.props;
+        const { classes, clickable, component, onClick } = this.props;
         const { tableCell, tableHeadCell, tableBodyCell } = classes;
         if (component === 'th') {
-            return `${clickable ? tableHeadCell : tableCell}`;
+            return `${(onClick !== undefined) || clickable ? tableHeadCell : tableCell}`;
         } else {
             return `${tableBodyCell}`;
         }
@@ -119,7 +119,7 @@ class DataTableCell extends React.Component {
     };
 
     render() {
-        const { classes,  className='', children, clickable, styles, actionType=null, handleActionClick, ...other } = this.props;
+        const { classes,  className='', children, styles, actionType=null, handleActionClick, ...other } = this.props;
         const action = (actionType !== null) ? <span className={classes.action} ref={this.action}>{this.getActionButton(actionType)}</span> : null;
 
         return (

@@ -8,16 +8,17 @@ import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableFooter from '@material-ui/core/TableFooter';
-import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TablePagination from '@material-ui/core/TablePagination';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
+import DataTableHead from './dataTableHead';
 import FilterBox from './filterBox';
 import axios from 'axios';
 import { getUrl } from '../utils/url';
+import { toTitleCase } from '../utils/helpers';
 
-const getCombos = (group_by, groups, combos=[], count=0) => {
+const getCombos = (group_by, groups, combos = [], count = 0) => {
     let labels = group_by;
     if (labels.length === count) {
         return combos;
@@ -42,29 +43,15 @@ const getCombos = (group_by, groups, combos=[], count=0) => {
     return getCombos(labels, groups, newCombos, count + 1);
 }
 
-function toTitleCase(str) {
-    str = "" + str;
-    return str.replace(/_/g, " ").replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
-}
-
 const styles = theme => ({
     root: {
         width: '100%',
         overflowX: 'auto',
-        paddingBottom: 20,
+        padding: '.5rem',
     },
     table: {
         width: "auto",
-        margin: "auto",
         transformStyle: 'preserve-3d',
-    },
-    tableHeadRow: {
-        height: 30,
-        transform: "none",
-
-    },
-    tableHead: {
-        transform: "none",
     },
     tableRow: {
         height: 30,
@@ -72,7 +59,7 @@ const styles = theme => ({
             backgroundColor: theme.palette.grey[100],
         },
         '&:nth-of-type(odd) td': {
-          backgroundColor: theme.palette.grey[300],
+            backgroundColor: theme.palette.grey[300],
         },
         '&:hover td': {
             backgroundColor: theme.palette.grey[400],
@@ -113,8 +100,6 @@ const styles = theme => ({
     groupHeader: {
         minHeight: 20,
         padding: 5,
-        margin: "auto",
-        width: "95%"
     },
     groupTitle: {
         fontSize: "1rem",
@@ -141,8 +126,6 @@ const styles = theme => ({
         textTransform: 'capitalize',
     },
     widthContainer: {
-        width: "95%",
-        margin: "auto",
         overflow: "auto",
     },
     condenseBtn: {
@@ -160,7 +143,7 @@ const styles = theme => ({
 
 function compare(column, dir, calc) {
     if (calc !== null) {
-        return function(a, b) {
+        return function (a, b) {
             a = calc(a[column], a);
             b = calc(b[column], b);
             if (a < b)
@@ -170,7 +153,7 @@ function compare(column, dir, calc) {
             return 0;
         };
     }
-    return function(a, b) {
+    return function (a, b) {
         a = a[column];
         b = b[column];
         if (a < b)
@@ -208,31 +191,6 @@ class DataTable extends React.Component {
         this.getData();
     };
 
-    componentDidMount() {
-        var checkExist = setInterval(() => {
-            if (this.fixedHeader.current !== null) {
-                const elemRect = this.fixedHeader.current.getBoundingClientRect();
-                const startPos = elemRect.top - 64 + window.pageYOffset;
-                window.addEventListener('scroll', this.transformTableHeader(startPos));
-               clearInterval(checkExist);
-            }
-         }, 100);
-    };
-
-    componentWillUnmount() {
-        window.removeEventListener('scroll', this.transformTableHeader());
-    }
-
-    transformTableHeader = (startPos) => () => {
-        if (this.fixedHeader.current !== null) {
-            if (window.pageYOffset > startPos) {
-                this.fixedHeader.current.style.transform = "translate3d(0px, " + (window.pageYOffset - startPos) + "px, 1px)";
-            } else {
-                this.fixedHeader.current.style.transform = 'none';
-            }
-        }
-    };
-
     getData = (filterValues) => {
         let { data, url, filters } = this.props;
         let state_data = this.state.data;
@@ -241,7 +199,7 @@ class DataTable extends React.Component {
             for (let f in filters) {
                 filterValues[f] = filters[f].default || "";
             }
-            this.setState({filterValues})
+            this.setState({ filterValues })
         }
         filterValues = filterValues || {};
         for (let f in filterValues) {
@@ -260,7 +218,7 @@ class DataTable extends React.Component {
         } else {
             data = (state_data.length > 0) ? state_data : data;
             this.setData(data);
-            
+
         }
     };
 
@@ -285,7 +243,7 @@ class DataTable extends React.Component {
         this.sortData(data, sortDir, sortColumn);
         if (groups !== undefined) {
             if (fixed_group !== undefined) {
-                this.setState({group_by: [groups[0]]})
+                this.setState({ group_by: [groups[0]] })
             }
             for (let group of groups) {
                 this.getGroup(group);
@@ -309,12 +267,12 @@ class DataTable extends React.Component {
         });
     };
 
-	handleSort = (value) => () => {
+    handleSort = (value) => () => {
         let { sortColumn, sortDir, data } = this.state;
         sortDir = ((sortColumn === value) ? -sortDir : 1);
         this.sortData(data, sortDir, value);
-        this.setState({page: 0});
-  	};
+        this.setState({ page: 0 });
+    };
 
     getDataReference = (id) => {
         let { references } = this.state;
@@ -327,7 +285,7 @@ class DataTable extends React.Component {
     getFilters = (filterValues) => {
         const { filters, renders } = this.props;
         if (filters !== undefined) {
-            return <FilterBox filters={filters} filterValues={filterValues} filterChange={this.filterChange} renders={renders}/>;
+            return <FilterBox filters={filters} filterValues={filterValues} filterChange={this.filterChange} renders={renders} />;
         }
         return null;
     };
@@ -390,7 +348,7 @@ class DataTable extends React.Component {
         calculations = calculations || {};
         labels = labels || {};
         for (let value of ordering) {
-            columns[value] = {label: labels[value] || value};
+            columns[value] = { label: labels[value] || value };
             if (renders.hasOwnProperty(value)) {
                 let render = renders[value];
                 if (render.hasOwnProperty("reference")) {
@@ -403,11 +361,11 @@ class DataTable extends React.Component {
             }
             if (columns[value].hasOwnProperty("createdCell")) {
                 columns[value].createdCell = function (td, cellData, rowData, row, col) {
-                     return td;
+                    return td;
                 };
             }
         }
-        
+
         this.setState({
             columns,
             references,
@@ -427,7 +385,7 @@ class DataTable extends React.Component {
         switch (calc) {
             case "ratio":
                 let { num, dom } = params;
-                func = (value, row, data) => (row[dom] > 0) ? row[num]/row[dom] : null;
+                func = (value, row, data) => (row[dom] > 0) ? row[num] / row[dom] : null;
                 break;
             case "rank":
                 let { dir } = params;
@@ -452,7 +410,7 @@ class DataTable extends React.Component {
                 };
                 break;
             default:
-                func = (value, row, data) => {return value;};
+                func = (value, row, data) => { return value; };
         }
         return func;
     };
@@ -468,7 +426,7 @@ class DataTable extends React.Component {
                 return_string = string;
             if (matches) {
                 for (var i = 0; i < matches.length; i++) {
-                    var capture =  matches[i].match(/^{{\s*(data|type|row)(?:.(\w+))?\s*}}$/)
+                    var capture = matches[i].match(/^{{\s*(data|type|row)(?:.(\w+))?\s*}}$/)
                     switch (capture[1]) {
                         case "data":
                             return_string = return_string.replace(matches[i], data);
@@ -486,9 +444,9 @@ class DataTable extends React.Component {
             }
             return return_string;
         };
-        switch(type) {
+        switch (type) {
             case "html":
-                func = function ( data, type, row ) {
+                func = function (data, type, row) {
                     const { element, text, before, after, attrs } = params;
                     let props = {};
                     for (let attr in attrs) {
@@ -500,19 +458,19 @@ class DataTable extends React.Component {
                             texts[i] = parse_vars(texts[i], data, type, row);
                         }
                     }
-                    switch(element) {
+                    switch (element) {
                         case "a":
                             if (texts[1] === "null") {
                                 return null;
                             }
-                            return <Button {...props} classes={{root: classes.button, label: classes.buttonLabel}} size="small" component="a">{texts[1].replace(/ /g, "\u00a0")}</Button>;
+                            return <Button {...props} classes={{ root: classes.button, label: classes.buttonLabel }} size="small" component="a">{texts[1].replace(/ /g, "\u00a0")}</Button>;
                         default:
                             return <div>{texts[0]}<span {...props}>{texts[1]}</span>{texts[2]}</div>;
                     }
                 };
                 break;
             case "percent":
-                func = (data, type, row) => (typeof data !== undefined && data !== null && data !== "N/A") ? Number.parseFloat(data*100).toFixed(decimal_places) + "%" : "";
+                func = (data, type, row) => (typeof data !== undefined && data !== null && data !== "N/A") ? Number.parseFloat(data * 100).toFixed(decimal_places) + "%" : "";
                 break;
             case "currency":
                 func = (data, type, row) => (typeof data !== undefined && data !== null && data !== "N/A") ? "$" + Number.parseFloat(data).toFixed(decimal_places) : "";
@@ -536,7 +494,7 @@ class DataTable extends React.Component {
                 };
                 break;
             default:
-                func = (data, type, row) => {return data;};
+                func = (data, type, row) => { return data; };
         }
         return func;
     };
@@ -566,17 +524,17 @@ class DataTable extends React.Component {
 
     getPageControls = (page, perPage) => {
         return (<TableFooter>
-                  <TableRow>
-                    <TablePagination
-                      colSpan={3}
-                      count={this.state.data.length}
-                      rowsPerPage={perPage}
-                      page={page}
-                      onChangePage={this.handleChangePage}
-                      onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                    />
-                  </TableRow>
-                </TableFooter>
+            <TableRow>
+                <TablePagination
+                    colSpan={3}
+                    count={this.state.data.length}
+                    rowsPerPage={perPage}
+                    page={page}
+                    onChangePage={this.handleChangePage}
+                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                />
+            </TableRow>
+        </TableFooter>
         );
     };
 
@@ -601,15 +559,15 @@ class DataTable extends React.Component {
 
     changeGroupBy = (group) => () => {
         if (group === null) {
-            this.setState({group_by: []});
+            this.setState({ group_by: [] });
         } else {
-            this.setState({group_by: [group]});
+            this.setState({ group_by: [group] });
         }
-        
+
     };
 
     toggleCondense = () => {
-        this.setState({condense: !this.state.condense});
+        this.setState({ condense: !this.state.condense });
     };
 
     getGroupBtns = (group_by) => {
@@ -658,45 +616,63 @@ class DataTable extends React.Component {
             }
         }
         groups[group] = items;
-        this.setState({groups});
+        this.setState({ groups });
     };
 
-    getRow = (row, index, ordering, columns, totals=false) => {
-        const { classes, freeze, theme } = this.props;
+    getTableHeadColumns = (ordering, columns, sortColumn) => {
+        const { freeze, head, theme } = this.props;
+        return ordering.map((value, index) => {
+            const column = columns[value];
+            const other = head[value] || {};
+            column.id = `${value}-${index + 1}`
+            column.onClick = this.handleSort(value);
+            column.styles = { "zIndex": 1 };
+            if (value === sortColumn) {
+                column.styles.backgroundColor = theme.palette.grey[900];
+                column.styles.color = theme.palette.primary.main;
+                column.styles.fontWeight = "bolder";
+            }
+            if (freeze !== undefined && freeze.length > index) {
+                column.styles.zIndex = 2;
+            }
+            return {...column, ...other};
+        });
+    }
+
+    getRow = (row, index, ordering, columns, totals = false) => {
+        const { classes, freeze } = this.props;
         return (
-          <TableRow className={classes.tableRow} key={index}>
-            {ordering.map((value, index2) => {
-                let column = columns[value];
-                let data = row[value];
-                let styles = {};
-                data = (column.hasOwnProperty("calc")) ? column.calc(data, row) : data;
-                data = column.hasOwnProperty("render") ? column.render(data, "", row) : data;
-                data = (!totals || row.hasOwnProperty(value)) ? data : (index2 === 0) ? "Totals" : null;
-                if (freeze !== undefined && index2 + 1 === freeze.length) {
-                    styles = {
-                        boxShadow: "grey 5px 0 5px -5px inset",
-                        height: "100%",
-                        top: 0,
-                        right: "-5px",
-                        position: "absolute",
-                        width: "5px",
+            <TableRow className={classes.tableRow} key={index}>
+                {ordering.map((value, index2) => {
+                    let column = columns[value];
+                    let data = row[value];
+                    let styles = {};
+                    data = (column.hasOwnProperty("calc")) ? column.calc(data, row) : data;
+                    data = column.hasOwnProperty("render") ? column.render(data, "", row) : data;
+                    data = (!totals || row.hasOwnProperty(value)) ? data : (index2 === 0) ? "Totals" : null;
+                    if (freeze !== undefined && index2 + 1 === freeze.length) {
+                        styles = {
+                            boxShadow: "grey 5px 0 5px -5px inset",
+                            height: "100%",
+                            top: 0,
+                            right: "-5px",
+                            position: "absolute",
+                            width: "5px",
+                        }
                     }
-                }
-                return <TableCell id={`${value}-${index + 1}`} className={classes.tableBodyCell} key={`${value}-${index}`} numeric>{data}<div style={styles}></div></TableCell>
-            })}
-          </TableRow>
+                    return <TableCell id={`${value}-${index + 1}`} className={classes.tableBodyCell} key={`${value}-${index}`} numeric>{data}<div style={styles}></div></TableCell>
+                })}
+            </TableRow>
         );
     };
 
-	render() {
-		const { classes, theme, paginate, totals, head, freeze, fixed_group, sections, condensed } = this.props;
+    render() {
+        const { classes, paginate, totals, condensed } = this.props;
         let { splits } = this.props;
         let { columns, data, filterValues, group_by, groups, ordering, perPage, page, sortColumn, condense } = this.state;
-        let headProps = head || {};
         let condense_button = null;
-        let thead;
         if (Object.keys(columns).length === 0) {
-            return <div className={classes.progressRoot}><CircularProgress className={classes.progress}/></div>;
+            return <div className={classes.progressRoot}><CircularProgress className={classes.progress} /></div>;
         }
         data = this.filterData(data, filterValues); /* filter the data */
         if (condensed !== undefined) {
@@ -706,28 +682,7 @@ class DataTable extends React.Component {
                     splits = condensed;
                 }
             }
-            condense_button = <FormControlLabel className={classes.condenseBtn} control={<Switch color="primary" onChange={this.toggleCondense} checked={!condense}/>} label="Show All"/>
-        }
-        if (splits === undefined) {
-            thead = (
-            <TableHead className={classes.tableHead} component={(props) => <thead ref={this.fixedHeader}>{props.children}</thead>}>
-                    <TableRow className={classes.tableHeadRow}>
-                        {ordering.map((value, index) => {
-                            let thProps = headProps[value] || {};
-                            let styles = {"zIndex": 1};
-                            if (value === sortColumn) {
-                                styles["backgroundColor"] = theme.palette.grey[900];
-                                styles["color"] = theme.palette.primary.main;
-                                styles["fontWeight"] = "bolder";
-                            }
-                            if (freeze !== undefined && freeze.length > index) {
-                                styles["zIndex"] = 2;
-                            }
-                            return <TableCell id={`${value}-0`} style={styles} className={classes.tableCell} onClick={this.handleSort(value)} key={value} {...thProps} numeric>{columns[value].label}</TableCell>;
-                        })}
-                    </TableRow>
-                </TableHead>
-            );
+            condense_button = <FormControlLabel className={classes.condenseBtn} control={<Switch color="primary" onChange={this.toggleCondense} checked={!condense} />} label="Show All" />
         }
         let footer = (paginate) ? this.getPageControls(page, perPage) : null;
         data = (paginate) ? data.slice(page * perPage, page * perPage + perPage) : data;
@@ -753,7 +708,7 @@ class DataTable extends React.Component {
                         </Toolbar>
                         <div className={classes.widthContainer} ref={this.widthContainers[i]} onScroll={this.handleXScroll(i)}>
                             <Table className={classes.table}>
-                                {thead}
+                                <DataTableHead columns={this.getTableHeadColumns(ordering, columns, sortColumn)}/>
                                 <TableBody>
                                     {this.getSections(groupData, ordering, columns)}
                                     {totalRow}
@@ -781,25 +736,6 @@ class DataTable extends React.Component {
             const totalData = (totals === undefined) ? null : this.getTotal(data, totals);
 
             let splitTables = Object.keys(splits).map((s, i) => {
-                let thead = (
-                    <TableHead className={classes.tableHead}>
-                        <TableRow className={classes.tableHeadRow}>
-                            {splits[s].map((value, index) => {
-                                let thProps = headProps[value] || {};
-                                let styles = {"zIndex": 1};
-                                if (value === sortColumn) {
-                                    styles["backgroundColor"] = theme.palette.grey[900];
-                                    styles["color"] = theme.palette.primary.main;
-                                    styles["fontWeight"] = "bolder";
-                                }
-                                if (freeze !== undefined && freeze.length > index) {
-                                    styles["zIndex"] = 2;
-                                }
-                                return <TableCell id={`${value}-0`} style={styles} className={classes.tableCell} onClick={this.handleSort(value)} key={value} {...thProps} numeric>{columns[value].label}</TableCell>;
-                            })}
-                        </TableRow>
-                    </TableHead>
-                );
                 return (
                     <div key={i} className={classes.groupContainer}>
                         <Toolbar className={classes.groupHeader}>
@@ -807,7 +743,7 @@ class DataTable extends React.Component {
                         </Toolbar>
                         <div className={classes.widthContainer} ref={this.widthContainers[i]} onScroll={this.handleXScroll(i)}>
                             <Table className={classes.table}>
-                                {thead}
+                                <DataTableHead columns={this.getTableHeadColumns(splits[s], columns, sortColumn)}/>
                                 <TableBody>
                                     {data.map((row, index) => this.getRow(row, index, splits[s], columns))}
                                     {(totalData === null) ? null : this.getRow(totalData, data.length, splits[s], columns, true)}
@@ -830,8 +766,8 @@ class DataTable extends React.Component {
             );
         }
         const totalRow = (totals === undefined) ? null : this.getRow(this.getTotal(data, totals), data.length, ordering, columns, true);
-		return (
-		    <div className={classes.root}>
+        return (
+            <div className={classes.root}>
                 <Toolbar className={classes.groupHeader}>
                     {this.getFilters(filterValues)}
                     <div>{this.getGroupBtns()}</div>
@@ -839,7 +775,7 @@ class DataTable extends React.Component {
                 </Toolbar>
                 <div className={classes.widthContainer} ref={this.widthContainers[0]} onScroll={this.handleXScroll(0)}>
                     <Table className={classes.table}>
-                        {thead}
+                        <DataTableHead columns={this.getTableHeadColumns(ordering, columns, sortColumn)} sticky={true}/>
                         <TableBody>
                             {this.getSections(data, ordering, columns)}
                             {totalRow}
@@ -847,9 +783,9 @@ class DataTable extends React.Component {
                         {footer}
                     </Table>
                 </div>
-		    </div>
-		);
-	}
+            </div>
+        );
+    }
 }
 
 export default withStyles(styles, { withTheme: true })(DataTable);
