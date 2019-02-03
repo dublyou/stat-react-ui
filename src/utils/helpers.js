@@ -58,3 +58,16 @@ export function toTitleCase(str) {
   }
   return str;
 }
+
+export const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+export function getDaysInMonth(month) {
+  const months30days = [4, 6, 9, 11];
+  if (month === 2) {
+    return 28;
+  }
+  if (months30days.indexOf(month) > -1) {
+    return 30;
+  }
+  return 31;
+}

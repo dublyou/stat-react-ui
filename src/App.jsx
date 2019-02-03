@@ -5,6 +5,7 @@ import Profile from './pages/profile';
 import Paper from '@material-ui/core/Paper';
 import SimplePage from './pages/simple';
 import GridPage from './pages/grid';
+import Scores from './pages/DailyScores';
 import Navbar from './components/navbar';
 import './App.css';
 import sample_args from './sample_data/player_profile';
@@ -44,13 +45,14 @@ class App extends Component {
         return <GridPage {...args}/>;
       case "comparison":
         return <SimplePage type="comparison" {...args}/>;
+      case "daily_scores":
+        return <Scores/>;
       default:
         return <SimplePage {...args}/>;
     }
   }
   render() {
     const { page, navbar } = args;
-
     return (
       <MuiThemeProvider theme={theme}>
         <Navbar {...navbar}></Navbar>

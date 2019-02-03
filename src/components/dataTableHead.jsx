@@ -63,13 +63,13 @@ class DataTableHead extends React.Component {
         return (
             <TableHead className={classes.tableHead} component={this.getTableHeadComponent()}>
                 <TableRow className={classes.tableHeadRow}>
-                    {columns.map((column) => {
-                        const { label, ...other } = column;
+                    {columns.map((column, i) => {
+                        const { render, calc, label, ...other } = column;
                         const props = {
-                            component: 'th', 
+                            component: 'th',
                             ...other
                         };
-                        return <DataTableCell {...props}>{label}</DataTableCell>;
+                        return <DataTableCell key={i} {...props}>{label}</DataTableCell>;
                     })}
                 </TableRow>
             </TableHead>
