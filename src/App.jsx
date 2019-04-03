@@ -1,14 +1,13 @@
 import React, { Component } from 'react';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
-import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import Profile from './pages/profile';
 import Paper from '@material-ui/core/Paper';
 import SimplePage from './pages/simple';
 import GridPage from './pages/grid';
 import Scores from './pages/DailyScores';
 import Navbar from './components/navbar';
-import './App.css';
 import sample_args from './sample_data/player_profile';
+import theme from './theme.js';
 /*draft, franchise_profile, team_profile, game_profile, player_profile, season_profile, standings, stats, 
 season_stat_leaders, alltime_stat_leaders, stat_rankings, season_stat_rankings, franchise_stat_rankings, home, player_comparison
 */
@@ -23,18 +22,6 @@ if (args === undefined) {
     args = JSON.parse(args);
   }
 }
-
-const theme = createMuiTheme({
-  palette: {
-    type: 'dark',
-    "primary": {
-        "light": "#ff6666",
-        "main": "#cc0000",
-        "dark": "#800000",
-        "contrastText": "#fff"
-    },
-  },
-});
 
 class App extends Component {
   getPage(page) {

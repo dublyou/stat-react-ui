@@ -152,7 +152,7 @@ class NavBar extends React.Component {
         <SideNav toggle={this.toggleDrawer(false).bind(this)} open={this.state.left}>
           <div className={classes.drawerHeader}>
             <div className={classes.container} style={{marginLeft: 10}}>
-              <Typography component="a" href="/" variant="title" color="inherit" className={classes.title}>
+              <Typography component="a" href="/" variant="h6" color="inherit" className={classes.title}>
                 {title || "Statdive"}
               </Typography>
               </div>

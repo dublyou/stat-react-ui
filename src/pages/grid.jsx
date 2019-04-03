@@ -1,6 +1,5 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
-import Articles from '../components/articles';
 import Headlines from '../components/headlines';
 import CardList from '../components/cardList';
 import Grid from '@material-ui/core/Grid';
@@ -23,7 +22,7 @@ const styles = theme => ({
 function getItem(type, args, other) {
   switch(type) {
   	case "articles":
-  		return <Articles {...args}/>;
+  		return null;
   	case "card_list":
   		return <CardList {...args} {...other}/>;
     case "headlines":

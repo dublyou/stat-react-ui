@@ -8,11 +8,13 @@ import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
-import OpenInNew from '@material-ui/icons/OpenInNew';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const styles = theme => ({
   root: {
     backgroundColor: theme.palette.background.default,
+    width: '100%',
+    margin: `${theme.spacing.unit}px 0`
   },
   media: {
     height: 0,
@@ -22,7 +24,6 @@ const styles = theme => ({
     display: 'flex',
   },
   source: {
-    color: "#fff",
     flex: 1,
   }
 });
@@ -30,29 +31,26 @@ const styles = theme => ({
 class Article extends React.Component {
 
   render() {
-    const { classes, url, source, publish_date, title, image_url, description, summary, width } = this.props;
-    const MyLink = props => <a target="_blank" href={url} {...props}>{props.children}</a>;
-    const card_size = {width: width || "100%", borderBottom: "1px solid #fff"}
-    const image = (image_url !== null) ? <CardMedia className={classes.media} image={image_url} title={image_url}/> : "";
+    const { classes, url, source, publish_date, title, image_url, description, summary } = this.props;
 
     return (
-        <Card className={classes.root} style={card_size}>
+        <Card className={classes.root}>
           <CardHeader
             action={
-              <IconButton component={MyLink}>
-                <OpenInNew />
+              <IconButton component='a' href={url} target='_blank'>
+                <OpenInNewIcon />
               </IconButton>
             }
-            title={title}
+            title={<Typography variant='h6'>{title}</Typography>}
             subheader={publish_date}
           />
-          {image}
+          {image_url && <CardMedia className={classes.media} image={image_url} title={image_url}/>}
           <CardContent>
-            <Typography component="p">{description || summary}</Typography>
+            <Typography variant='body2' color='textSecondary'>{description || summary}</Typography>
           </CardContent>
           <CardActions className={classes.actions} disableActionSpacing>
-            <a className={classes.source} target="_blank" href={`http://${source}`}>{source}</a>
-            <Button component={MyLink}>Go&nbsp;to&nbsp;article</Button>
+            <Typography component='a' className={classes.source} target="_blank" href={`http://${source}`} variant='subtitle1'>{source}</Typography>
+            <Button variant='outlined' component='a' href={url} target='_blank'>Go&nbsp;to&nbsp;article</Button>
           </CardActions>
         </Card>
     );
