@@ -39,7 +39,7 @@ class Expand extends React.Component {
 		return (
         <ExpansionPanel className={classes.root} {...other}>
 		        <ExpansionPanelSummary classes={expansionPanelClasses} expandIcon={<ExpandMoreIcon />}>
-		          <Typography variant='subheading'>{title}</Typography>
+		          <Typography variant='subtitle1'>{title}</Typography>
 		        </ExpansionPanelSummary>
 		        <ExpansionPanelDetails className={classes.expandDetails}>
 		          {children}

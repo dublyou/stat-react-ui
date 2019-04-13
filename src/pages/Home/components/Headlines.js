@@ -38,7 +38,19 @@ const styles = theme => ({
     avatar: {
         width: 20,
         height: 20,
-        borderRadius: 0
+        borderRadius: 0,
+        [theme.breakpoints.down('md')]: {
+            width: 16,
+            height: 16,
+        },
+        [theme.breakpoints.down('sm')]: {
+            width: 12,
+            height: 12,
+        },
+        [theme.breakpoints.down('xs')]: {
+            width: 20,
+            height: 20,
+        },
     },
     content: {
         padding: theme.spacing.unit/2,
@@ -59,14 +71,34 @@ const styles = theme => ({
       fontSize: "1rem",
     },
     listItem: {
-        padding: theme.spacing.unit/2
+        padding: theme.spacing.unit/2,
+        minHeight: 48,
+        [theme.breakpoints.down('md')]: {
+            minHeight: 44
+        },
+        [theme.breakpoints.down('sm')]: {
+            minHeight: 40
+        },
+        [theme.breakpoints.down('xs')]: {
+            minHeight: 48
+        },
     },
     listItemText: {
         paddingRight: 0,
+        paddingLeft: theme.spacing.unit,
     },
     listItemTextPrimary: {
         fontSize: '.8rem',
         fontWeight: 300,
+        [theme.breakpoints.down('md')]: {
+            fontSize: '.65rem'
+        },
+        [theme.breakpoints.down('sm')]: {
+            fontSize: '.5rem'
+        },
+        [theme.breakpoints.down('xs')]: {
+            fontSize: '.8rem'
+        }
     },
     tab: {
         minWidth: 'auto',
@@ -80,6 +112,10 @@ const styles = theme => ({
     input: {
         zIndex: 4,
         padding: theme.spacing.unit
+    },
+    inputBase: {
+        paddingRight: theme.spacing.unit/2,
+        width: 'auto',
     },
     textField: {
         marginTop: theme.spacing.unit
@@ -212,13 +248,11 @@ class Headlines extends React.Component {
                             InputProps={{
                                 classes: {
                                     input: classes.input,
-                                    notchedOutline: classes.notchedOutline
+                                    notchedOutline: classes.notchedOutline,
+                                    root: classes.inputBase,
                                 },
                                 inputProps: {
                                     placeholder: 'Search news...'
-                                },
-                                style: {
-                                    width: 'auto'
                                 },
                                 endAdornment: (
                                     <InputAdornment position="end">

@@ -8,7 +8,7 @@ export const defaultTheme = createMuiTheme({
 
 export const themePalette = {
     primary: {
-        main: "#cc0000",
+        main: "#b30000",
     },
 }
 

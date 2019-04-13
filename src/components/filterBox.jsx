@@ -2,7 +2,6 @@ import React from 'react';
 import NumberFormat from 'react-number-format';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import Chip from '@material-ui/core/Chip';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -169,6 +168,7 @@ class FilterBox extends React.Component {
                         </FormControl>
                     );
                   }
+                  return null;
                 })}
                 {filter_ids.map((value, i) => {
                   if (filters[value].type === "select") {
@@ -188,6 +188,7 @@ class FilterBox extends React.Component {
                         </FormControl>
                     );
                   }
+                  return null;
                 })}
                 {filterSelect}
             </div>

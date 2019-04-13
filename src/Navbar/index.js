@@ -12,6 +12,8 @@ import SearchIcon from '@material-ui/icons/Search';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import SideBar from './components/SideBar';
 import SearchBar from './components/SearchBar';
+import SimpleList from '../components/simpleList';
+import { sideBarItems, sideBarResources } from './helpers';
 
 
 const styles = theme => ({
@@ -21,6 +23,7 @@ const styles = theme => ({
   title: {
     textDecoration: "none",
     display: "inline-block",
+    marginLeft: ".5rem"
   },
   menuButton: {
     marginLeft: -12,
@@ -32,6 +35,8 @@ const styles = theme => ({
   drawerHeader: {
     display: "flex",
     alignItems: "center",
+    backgroundColor: '#212121',
+    height: 65
   },
   listItems: {
     fontSize: "1.2rem",
@@ -53,7 +58,11 @@ const styles = theme => ({
     transition: 'width .4s',
     display: 'flex',
     justifyContent: 'flex-end',
+    maxWidth: 400,
   },
+  sectionTitle: {
+    margin: `0 ${theme.spacing.unit}px`,
+  }
 });
 
 class NavBar extends React.Component {
@@ -91,9 +100,11 @@ class NavBar extends React.Component {
             </IconButton>
             <div className={classes.transitionContainer}>
                 <Hidden xsDown={showSearch}>
-                    <Typography component="a" href="/" variant="h6" color="primary" className={classes.title} style={{flex: 1, marginLeft: ".5rem"}}>
-                        {title || "Statdive"}
-                    </Typography>
+                    <div style={{flex: 1}}>
+                        <Typography component="a" href="/" variant="h6" color="primary" className={classes.title}>
+                            {title || "Statdive"}
+                        </Typography>
+                    </div>
                 </Hidden>
                 <div className={classes.searchBarContainer} style={{width: showSearch ? '100%' : 0, overflow: showSearch ? 'visible': 'hidden'}}>
                     <SearchBar/>
@@ -105,16 +116,22 @@ class NavBar extends React.Component {
         </Toolbar>
         <SideBar toggle={this.toggleDrawer(false)} open={openSideBar}>
           <div className={classes.drawerHeader}>
-            <Typography component="a" href="/" variant="h6" className={classes.title} style={{flex: 1, marginLeft: ".5rem"}}>
-                {title || "Statdive"}
-            </Typography>
+            <div style={{flex: 1}}>
+                <Typography component="a" href="/" variant="h6" color="primary" className={classes.title}>
+                    {title || "Statdive"}
+                </Typography>
+            </div>
             <IconButton onClick={this.toggleDrawer(false)}>
               <ChevronLeftIcon />
             </IconButton>
           </div>
           <Divider />
+          <div className={classes.list}>
+            <SimpleList component="a" styles={classes.listItems} items={sideBarItems}/>
+          </div>
           <Divider />
-          <Typography variant="h6">Resources</Typography>
+          <Typography className={classes.sectionTitle} variant="h6">Resources</Typography>
+          <SimpleList {...sideBarResources}/>
         </SideBar>
       </AppBar>
     );

@@ -9,13 +9,7 @@ import Typography from '@material-ui/core/Typography';
 import CustomCard from './customCard';
 import SimpleList from './simpleList';
 import SummaryTable from './summaryTable';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
 import { getImage } from '../utils/url';
-import { get } from 'http';
 
 const styles = theme => ({
   root: {
@@ -112,17 +106,6 @@ const styles = theme => ({
   },
 });
 
-function profileTable(props) {
-	let { classes, data } = props;
-	const labels = Object.keys(data);
-	return (
-		<Table className={classes.profileTable}>
-			<TableHead><TableRow className={classes.profileTableRow}>{labels.map(value => <TableCell className={classes.profileTableCell}>{value}</TableCell>)}</TableRow></TableHead>
-			<TableBody><TableRow className={classes.profileTableRow}>{labels.map(value => <TableCell className={classes.profileTableCell}>{data[value]}</TableCell>)}</TableRow></TableBody>
-		</Table>
-	);
-}
-
 function getHeaderContent(props) {
 	let { classes, heading, type, image, image_caption, details, accordion, cards, summary_table } = props;
 	let content = [];
@@ -152,7 +135,7 @@ function getHeaderContent(props) {
 						}
 					}
 				}
-				content.push(<div key="profileHeading" className={classes.headingContainer}><Typography className={classes.heading} variant="headline">{primaryHeading}</Typography>{secondaryHeading}</div>);
+				content.push(<div key="profileHeading" className={classes.headingContainer}><Typography className={classes.heading} variant="h5">{primaryHeading}</Typography>{secondaryHeading}</div>);
 			}
 			if (cards !== undefined && cards !== null) {
 				content = content.concat(cards.map((card, index) => <CustomCard key={index} {...card}/>));
@@ -162,7 +145,7 @@ function getHeaderContent(props) {
 				if (image_caption !== undefined) {
 					let cardContent = (
 						<CardContent className={classes.profileContent}>
-							<Typography variant="subheading" style={{"textAlign": "center"}}>{Object.keys(image_caption).map(value => image_caption[value]).join(" / ")}</Typography>
+							<Typography variant="subtitle1" style={{"textAlign": "center"}}>{Object.keys(image_caption).map(value => image_caption[value]).join(" / ")}</Typography>
 						</CardContent>
 					);
 					subcontent.push(<Card key="profileImage" className={classes.cardMedia}>{cardMedia}{cardContent}</Card>);

@@ -110,7 +110,7 @@ class DataTableCell extends React.Component {
             if (!isNaN(+children)) {
                 styles.textAlign = 'right';
             } else if (typeof children === 'string') {
-                if (/^(?:[\d\.]+\s*\%?|\$?\s*[\d,\.]+)$/.test()) {
+                if (/^(?:[\d.]+\s*%?|\$?\s*[\d,.]+)$/.test()) {
                     styles.textAlign = 'right';
                 }
             }

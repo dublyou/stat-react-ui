@@ -11,9 +11,8 @@ import { fab } from '@fortawesome/free-brands-svg-icons';
 
 library.add(fab);
 
-
 const domMounts = {
-    home: Home,
+    home_placeholder: Home,
 };
 
 Object.keys(domMounts).forEach(mountId => {
@@ -29,5 +28,9 @@ Object.keys(domMounts).forEach(mountId => {
     }
 });
 
-ReactDOM.render(<MuiThemeProvider theme={darkTheme}><Home/></MuiThemeProvider>, document.getElementById('root'));
+const rootElement = document.getElementById('root');
+if (rootElement) {
+    ReactDOM.render(<MuiThemeProvider theme={darkTheme}><App/></MuiThemeProvider>, document.getElementById('root'));
+}
+
 registerServiceWorker();

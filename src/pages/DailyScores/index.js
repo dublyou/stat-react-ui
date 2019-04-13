@@ -1,9 +1,8 @@
 import React from 'react';
 import PropTypes from "prop-types";
 import { withStyles } from '@material-ui/core/styles';
-import Toolbar from '@material-ui/core/Toolbar';
 import Button from '@material-ui/core/Button';
-import { Row, Col } from 'react-flexa';
+import Grid from '@material-ui/core/Grid';
 import Score from './components/Score';
 import SelectControl from '../../components/SelectControl';
 import { getScores } from '../../api/daily_scores';
@@ -22,6 +21,7 @@ const styles = theme => ({
     row: {
         width: '100%',
         maxWidth: 800,
+        alignItems: 'center'
     },
     toolbar: {
         display: 'flex',
@@ -106,31 +106,31 @@ class Scores extends React.Component {
 		return (
             <div className={classes.root}>
                 <div className={classes.toolbar}>
-                    <Row className={classes.row} alignItems='center'>
-                        <Col xs={0} sm={2}>
+                    <Grid container className={classes.row}>
+                        <Grid item xs={0} sm={2}>
                             <Button className={classes.button} fullWidth={true} variant='contained' onClick={this.handleIncrement(-1)}>&#171;Prev</Button>
-                        </Col>
-                        <Col xs={6} sm={4}>
+                        </Grid>
+                        <Grid item xs={6} sm={4}>
                             <SelectControl label='Month' onChange={this.handleDateChange('month')} value={month} options={months.map((value, i) => ({value: i + 1, label: value}))}/>
-                        </Col>
-                        <Col xs={3} sm={2}>
+                        </Grid>
+                        <Grid item xs={3} sm={2}>
                             <SelectControl label='Day' onChange={this.handleDateChange('day')} value={day} options={dayOptions.map(value => ({value, label: value}))}/>
-                        </Col>
-                        <Col xs={3} sm={2}>
+                        </Grid>
+                        <Grid item xs={3} sm={2}>
                             <SelectControl label='Year' onChange={this.handleDateChange('year')} value={year} options={this.years.map(value => ({value, label: value}))}/>
-                        </Col>
-                        <Col xs={0} sm={2}>
+                        </Grid>
+                        <Grid item xs={0} sm={2}>
                             <Button className={classes.button} fullWidth={true} variant='contained' onClick={this.handleIncrement(1)}>Next&#187;</Button>
-                        </Col>
-                    </Row>
-                    <Row className={classes.row}>
-                        <Col xs={6} sm={0}>
+                        </Grid>
+                    </Grid>
+                    <Grid container className={classes.row}>
+                        <Grid item xs={6} sm={0}>
                             <Button className={classes.button} size='small' fullWidth={true} variant='contained' onClick={this.handleIncrement(-1)}>&#171;Prev</Button>
-                        </Col>
-                        <Col xs={6} sm={0}>
+                        </Grid>
+                        <Grid item xs={6} sm={0}>
                             <Button className={classes.button} size='small' fullWidth={true} variant='contained' onClick={this.handleIncrement(1)}>Next&#187;</Button>
-                        </Col>
-                    </Row>
+                        </Grid>
+                    </Grid>
                 </div>
                 {this.state.data.map((score, i) => <Score key={i} {...score}/>)}
             </div>

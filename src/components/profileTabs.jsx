@@ -60,8 +60,8 @@ class ProfileTabs extends React.Component {
             onChange={this.handleChange}
             indicatorColor="primary"
             textColor="primary"
-            scrollable
             scrollButtons="auto"
+            variant='scrollable'
           >
             {tabList}
           </Tabs>

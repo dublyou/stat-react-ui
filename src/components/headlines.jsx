@@ -27,7 +27,7 @@ class Headlines extends React.Component {
   }
 
   render() {
-    const { classes, count } = this.props;
+    const { count } = this.props;
     const { data } = this.state;
     let items = data.slice(0, count || 10).map((value) => ({primary: value.title, props: {href: value.url, target: "_blank", title: value.description}}));
 

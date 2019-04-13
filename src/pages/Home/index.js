@@ -4,16 +4,16 @@ import Grid from '@material-ui/core/Grid';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Paper from '@material-ui/core/Paper';
-import { withWindowSize } from 'react-fns';
 import Article from './components/Article';
 import Headlines from './components/Headlines';
 import TwitterTimeline from './components/TwitterTimeline';
 import LoadMore from '../../components/LoadMore';
 import Navbar from '../../Navbar';
+import { withWindowSize } from 'react-fns';
 import { getArticles } from '../../api/articles';
-import startCase from 'lodash/startCase';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faNewspaper } from '@fortawesome/free-solid-svg-icons';
+import startCase from 'lodash/startCase';
 
 const styles = theme => ({
   root: {

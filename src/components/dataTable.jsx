@@ -120,10 +120,12 @@ const styles = theme => ({
         position: "static",
         "&:hover": {
             color: theme.palette.primary.main,
-        }
+        }, 
+        minWidth: 'auto'
     },
     buttonLabel: {
         textTransform: 'capitalize',
+        width: 'auto'
     },
     widthContainer: {
         overflow: "auto",
@@ -463,7 +465,7 @@ class DataTable extends React.Component {
                             if (texts[1] === "null") {
                                 return null;
                             }
-                            return <Button {...props} classes={{ root: classes.button, label: classes.buttonLabel }} size="small" component="a">{texts[1].replace(/ /g, "\u00a0")}</Button>;
+                            return <Button {...props} variant='text' classes={{ root: classes.button, label: classes.buttonLabel }} size="small" component="a">{texts[1].replace(/ /g, "\u00a0")}</Button>;
                         default:
                             return <div>{texts[0]}<span {...props}>{texts[1]}</span>{texts[2]}</div>;
                     }
@@ -586,7 +588,7 @@ class DataTable extends React.Component {
     getSections = (data, ordering, columns) => {
         const { classes, sections } = this.props;
         if (sections !== undefined) {
-            let { column, values, collapse } = sections;
+            let { column, values } = sections;
             let section_rows = [];
             for (let value of values) {
                 section_rows.push(<TableRow key={value} className={classes.sectionRow}><TableCell colSpan={ordering.length}>{toTitleCase(value)}</TableCell></TableRow>);
@@ -660,7 +662,7 @@ class DataTable extends React.Component {
                             width: "5px",
                         }
                     }
-                    return <TableCell id={`${value}-${index + 1}`} className={classes.tableBodyCell} key={`${value}-${index}`} numeric>{data}<div style={styles}></div></TableCell>
+                    return <TableCell id={`${value}-${index + 1}`} className={classes.tableBodyCell} key={`${value}-${index}`} align='right'>{data}<div style={styles}></div></TableCell>
                 })}
             </TableRow>
         );
@@ -739,7 +741,7 @@ class DataTable extends React.Component {
                 return (
                     <div key={i} className={classes.groupContainer}>
                         <Toolbar className={classes.groupHeader}>
-                            <Typography className={classes.groupTitle} variant="title">{s}</Typography>
+                            <Typography className={classes.groupTitle} variant="h6">{s}</Typography>
                         </Toolbar>
                         <div className={classes.widthContainer} ref={this.widthContainers[i]} onScroll={this.handleXScroll(i)}>
                             <Table className={classes.table}>

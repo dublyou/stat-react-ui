@@ -21,7 +21,6 @@ const styles = theme => ({
   container: {
     flexGrow: 1,
     position: 'relative',
-    maxWidth: 400,
   },
   input: {
     [theme.breakpoints.down('xs')]: {
@@ -66,7 +65,7 @@ function searchInput(props) {
         classes: {
           input: classes.input,
           notchedOutline: classes.notchedOutline
-        },
+        }
       }}
       {...other}
     />
@@ -201,7 +200,7 @@ class SearchBar extends React.Component {
   };
 
   handleKeyPress = (event) => {
-    if(event.key == 'Enter') {
+    if(event.key === 'Enter') {
       let suggestions = this.state.originalSuggestions;
       if (suggestions.length > 0) {
         let { handleClick } = this.props;

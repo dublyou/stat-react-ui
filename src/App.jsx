@@ -1,51 +1,54 @@
-import React, { Component } from 'react';
-import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
+import React, { Component } from 'react'
 import Profile from './pages/profile';
 import Paper from '@material-ui/core/Paper';
 import SimplePage from './pages/simple';
 import GridPage from './pages/grid';
 import Scores from './pages/DailyScores';
-import Navbar from './components/navbar';
-import sample_args from './sample_data/player_profile';
-import theme from './theme.js';
-/*draft, franchise_profile, team_profile, game_profile, player_profile, season_profile, standings, stats, 
-season_stat_leaders, alltime_stat_leaders, stat_rankings, season_stat_rankings, franchise_stat_rankings, home, player_comparison
-*/
-
-const rootEl = document.getElementById('root');
-let args = window.args;
-if (args === undefined) {
-  args = rootEl.getAttribute("data-args");
-  if (args === "test") {
-    args = sample_args;
-  } else {
-    args = JSON.parse(args);
-  }
-}
+import Navbar from './Navbar';
 
 class App extends Component {
-  getPage(page) {
+  state = {
+    args: null
+  }
+
+  componentDidMount() {
+    this.setState({args: window.args});
+  }
+
+  getPage(args) {
+    const { page, ...other} = args;
     switch(page) {
       case "profile":
-        return <Profile {...args}/>;
+        return <Profile {...other}/>;
       case "grid":
-        return <GridPage {...args}/>;
+        return <GridPage {...other}/>;
       case "comparison":
-        return <SimplePage type="comparison" {...args}/>;
+        return <SimplePage type="comparison" {...other}/>;
       case "daily_scores":
         return <Scores/>;
       default:
-        return <SimplePage {...args}/>;
+        return <SimplePage {...other}/>;
     }
   }
+
   render() {
-    const { page, navbar } = args;
-    return (
-      <MuiThemeProvider theme={theme}>
-        <Navbar {...navbar}></Navbar>
-        <Paper style={{paddingTop: 70, minHeight: "calc(100% - 70px)"}}>{this.getPage(page)}</Paper>
-      </MuiThemeProvider>
-    );
+    const { args } = this.state;
+    if (args) {
+      return (
+        <React.Fragment>
+          <Navbar/>
+          <Paper 
+            style={{
+              paddingTop: 70, 
+              minHeight: "calc(100% - 70px)"
+            }}
+          >
+            {this.getPage(args)}
+          </Paper>
+        </React.Fragment>
+      );
+    }
+    return null;
   }
 }
 

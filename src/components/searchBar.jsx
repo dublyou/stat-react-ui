@@ -277,7 +277,7 @@ class SearchBar extends React.Component {
   };
 
   handleKeyPress = (event) => {
-    if(event.key == 'Enter') {
+    if(event.key === 'Enter') {
       let suggestions = this.state.originalSuggestions;
       if (suggestions.length > 0) {
         let { handleClick } = this.props;

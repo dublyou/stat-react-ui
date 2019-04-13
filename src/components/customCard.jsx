@@ -5,7 +5,6 @@ import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
-import CardActions from '@material-ui/core/CardActions';
 import Hidden from '@material-ui/core/Hidden';
 import Typography from '@material-ui/core/Typography';
 
@@ -21,47 +20,45 @@ const styles = theme => ({
   }
 });
 
-function cardHeader(props, index) {
-  const { classes } = props;
+function cardHeader(props) {
   return (
-  	<CardHeader key={index} {...this.props}/>
+  	<CardHeader {...props}/>
   );
 }
 
-function cardMedia(props, index) {
-  const { classes } = props;
+function cardMedia(props) {
   return (
-  	<CardMedia key={index} {...props}/>
+  	<CardMedia {...props}/>
   );
 }
 
-function cardAvatar(props, index) {
-  const { classes, size, image, title } = props;
+function cardAvatar(props) {
+  const { size, image, title } = props;
   const styles = {height: size || "4rem", weight: size || "4rem"};
   return (
     <Avatar key={title} style={styles} title={title} src={image} />
   );
 }
 
-function typography(props, index) {
+function typography(props) {
 	const { content, text, hidden, ...other } = props;
   let inner;
 	if (text === undefined) {
-		inner = <Typography key={index}  {...other}/>;
+		inner = <Typography {...other}/>;
 	}
-	inner = <Typography key={index} {...other}>{text}</Typography>;
+	inner = <Typography {...other}>{text}</Typography>;
   if (hidden !== undefined) {
     let args = {};
     args[hidden] = true;
-    return <Hidden key={`hidden-${index}`} {...args}>{inner}</Hidden>;
+    return <Hidden {...args}>{inner}</Hidden>;
   }
   return inner;
 }
 
-function cardContent(props, index) {
+function cardContent(props) {
 	const { classes, items } = props;
 	return (
-		<CardContent key={index} className={classes.content}>
+		<CardContent className={classes.content}>
 			{items.map((props, i) => typography(props, i))}
     </CardContent>
 	);
@@ -80,9 +77,9 @@ class CustomCard extends React.Component {
 
 		return (
 			<Card className={classes.card} style={styles}>
-				{content.map((props, index) => {
+				{content.map(props => {
           props["classes"] = classes;
-          return cardFunctions[props.type](props, index);
+          return cardFunctions[props.type](props);
         })}
 	    </Card>
 		);
