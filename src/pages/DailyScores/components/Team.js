@@ -4,18 +4,12 @@ import Hidden from '@material-ui/core/Hidden';
 import ObjectLink from './ObjectLink';
 
 const styles = theme => ({
-    tableCell: {
-        border: 'none',
-        padding: '.5rem .2rem',
-    },
-    tableRowLoser: {
-        opacity: .5,
-    }
+    
 });
 
 class Team extends React.Component {
     render() {
-        const { classes, abbrev, name, points, record, image, url, win } = this.props;
+        const { abbrev, name, points, record, image, url, win } = this.props;
         const objectLinkProps = {
             href: url,
             image,
@@ -23,16 +17,17 @@ class Team extends React.Component {
             secondary: record,
             secondText: points,
             denseText: abbrev,
+            opacity: win ? 1 : .5,
         }
         return (
-            <li className={win ? undefined : classes.tableRowLoser}>
+            <React.Fragment>
                 <Hidden xsDown>
                     <ObjectLink {...objectLinkProps}/>
                 </Hidden>
                 <Hidden smUp>
                     <ObjectLink dense {...objectLinkProps}/>
                 </Hidden>
-            </li>
+            </React.Fragment>
         );
     }
 }

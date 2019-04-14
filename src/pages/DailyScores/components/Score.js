@@ -70,7 +70,7 @@ class Score extends React.Component {
                         })}
                     </List>
                 </Hidden>
-                <Button variant='outlined' fullWidth className={classes.button} classes={{label: classes.buttonLabel}} component='a' href={url}>Details</Button>
+                <Button variant='contained' fullWidth className={classes.button} classes={{label: classes.buttonLabel}} component='a' href={url}>Details</Button>
             </Paper>
         );
 	}

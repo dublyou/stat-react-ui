@@ -12,6 +12,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import SideBar from './components/SideBar';
 import SearchBar from './components/SearchBar';
+import Scores from './components/Scores';
 import SimpleList from '../components/simpleList';
 import { sideBarItems, sideBarResources } from './helpers';
 
@@ -23,7 +24,13 @@ const styles = theme => ({
   title: {
     textDecoration: "none",
     display: "inline-block",
-    marginLeft: ".5rem"
+    marginLeft: ".5rem",
+    textShadow: `-1px -1px 0 ${theme.palette.text.secondary}, 1px -1px 0 ${theme.palette.text.secondary}, -1px 1px 0 ${theme.palette.text.secondary}, 1px 1px 0 ${theme.palette.text.secondary}`,
+    letterSpacing: 0.5,
+    fontSize: 44,
+    lineHeight: 1,
+    fontWeight: 700,
+    fontFamily: 'Varela Round'
   },
   menuButton: {
     marginLeft: -12,
@@ -42,9 +49,9 @@ const styles = theme => ({
     fontSize: "1.2rem",
   },
   transitionContainer: {
-    width: '100%', 
-    display: 'flex', 
-    justifyContent: 'flex-end', 
+    justifyContent: 'flex-end',
+    width: 'calc(100% - 96px)',
+    display: 'flex',
     alignItems: 'center'
   },
   searchBar: {
@@ -100,11 +107,14 @@ class NavBar extends React.Component {
             </IconButton>
             <div className={classes.transitionContainer}>
                 <Hidden xsDown={showSearch}>
-                    <div style={{flex: 1}}>
-                        <Typography component="a" href="/" variant="h6" color="primary" className={classes.title}>
-                            {title || "Statdive"}
-                        </Typography>
-                    </div>
+                  <div style={{display: 'flex', width: '100%', alignItems: 'center'}}>
+                      <Typography component="a" href="/" variant="h6" color="primary" className={classes.title}>
+                        {title || "Statdive"}
+                      </Typography>
+                      <Hidden smDown>
+                        <Scores hide={showSearch}/>
+                      </Hidden>
+                  </div>
                 </Hidden>
                 <div className={classes.searchBarContainer} style={{width: showSearch ? '100%' : 0, overflow: showSearch ? 'visible': 'hidden'}}>
                     <SearchBar/>

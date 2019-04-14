@@ -3,6 +3,7 @@ import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 export const defaultTheme = createMuiTheme({
     typography: {
         useNextVariants: true,
+        fontFamily: 'Maven Pro'
     },
 });
 
@@ -20,7 +21,8 @@ export const darkTheme = createMuiTheme({
     },
     props: {
         MuiButton: {
-            variant: 'contained'
+            variant: 'contained',
+            color: 'primary'
         },
         MuiTypography: {
             color: 'textPrimary'

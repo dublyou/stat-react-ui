@@ -1,12 +1,12 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Avatar from '@material-ui/core/Avatar';
+import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import MenuItem from '@material-ui/core/MenuItem';
-import { getImage } from '../../../utils/url';
+import { getImage } from '../utils/url';
 
 const styles = theme => ({
-    menuItem: {
+    listItem: {
         margin: `${theme.spacing.unit/2}px 0`,
         paddingLeft: theme.spacing.unit,
         paddingRight: theme.spacing.unit,
@@ -17,6 +17,7 @@ const styles = theme => ({
     },
     secondText: {
         justifySelf: 'flex-end',
+        paddingRight: 0,
         [theme.breakpoints.down('sm')]: {
             padding: 0,
         }
@@ -33,6 +34,7 @@ const styles = theme => ({
         }
     },
     primary: {
+        fontSize: 'inherit',
         [theme.breakpoints.down('xs')]: {
             fontSize: '.7rem'
         }
@@ -48,7 +50,7 @@ class ObjectLink extends React.Component {
     render() {
         const { classes, className, primary, secondary, secondText, image, dense, denseText, opacity, ...other } = this.props;
         return (
-            <MenuItem button component='a' dense={dense} className={`${classes.menuItem} ${className || ''}`} style={{opacity: opacity}} {...other}>
+            <ListItem dense={dense} className={`${classes.listItem} ${className || ''}`} style={{opacity: opacity}} {...other}>
                 {image && <Avatar src={getImage(image)} className={dense ? classes.smallAvatar : undefined}/>}
                 <ListItemText 
                     className={classes.text}
@@ -60,7 +62,7 @@ class ObjectLink extends React.Component {
                 {secondText && (
                     <ListItemText primary={secondText} className={classes.secondText} classes={{ primary: classes.secondTextType }}/>
                 )}
-            </MenuItem>
+            </ListItem>
         )
     }
 }

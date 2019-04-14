@@ -2,9 +2,13 @@ import React from 'react';
 import PropTypes from "prop-types";
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Hidden from '@material-ui/core/Hidden';
 import Paper from '@material-ui/core/Paper';
 import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import Score from './components/Score';
 import SelectControl from '../../components/SelectControl';
 import { getScores } from '../../api/daily_scores';
@@ -53,7 +57,8 @@ class Scores extends React.Component {
         const today = new Date();
         this.years = range(1947, today.getFullYear() + 1);
         this.state = {
-            data: [],
+            scores: [],
+            isLoaded: false,
             day: today.getDate() - 1,
             month: today.getMonth() + 1,
             year: today.getFullYear(),
@@ -80,9 +85,11 @@ class Scores extends React.Component {
 
     getScores = () => {
         const { day, month, year } = this.state;
+        this.setState({isLoaded: false, scores: []});
         getScores(day, month, year).then(res => {
             this.setState({
-                data: res.data,
+                scores: res.data,
+                isLoaded: true,
             });
         });
     };
@@ -117,7 +124,7 @@ class Scores extends React.Component {
 
 	render() {
         const { classes } = this.props;
-        const { day, dayOptions, month, year } = this.state;
+        const { day, dayOptions, month, isLoaded, scores, year } = this.state;
         const dateSelectors = (
             <div className={classes.dateSelectors}>
                 <SelectControl label='Month' onChange={this.handleDateChange('month')} value={month} options={months.map((value, i) => ({value: i + 1, label: value}))}/>
@@ -132,13 +139,25 @@ class Scores extends React.Component {
                     <Hidden smUp>
                         {dateSelectors}
                     </Hidden>
-                    <Toolbar className={classes.toolbar}>
-                        <Button className={classes.button} fullWidth variant='outlined' onClick={this.handleIncrement(-1)}>&#171;Prev</Button>
-                        <Hidden xsDown>{dateSelectors}</Hidden>
-                        <Button className={classes.button} fullWidth variant='outlined' onClick={this.handleIncrement(1)}>Next&#187;</Button>
-                    </Toolbar>
+                    <Hidden xsDown>
+                        <Toolbar className={classes.toolbar}>
+                            <Button className={classes.button} fullWidth variant='contained' onClick={this.handleIncrement(-1)}><ChevronLeftIcon/>Prev</Button>
+                            {dateSelectors}
+                            <Button className={classes.button} fullWidth variant='contained' onClick={this.handleIncrement(1)}>Next<ChevronRightIcon/></Button>
+                        </Toolbar>
+                    </Hidden>
                 </Paper>
-                {this.state.data.map((score, i) => <Score key={i} {...score}/>)}
+                {isLoaded ? (scores.length > 0 ? scores.map((score, i) => <Score key={i} {...score}/>) : (
+                    <Typography variant='h4' style={{textAlign: 'center'}}>No Scores on {months[month - 1]} {day}, {year}</Typography>
+                )) : <div style={{textAlign: 'center'}}><CircularProgress color='primary'/></div>}
+                <Hidden smUp>
+                    <Paper className={classes.paper}>
+                        <Toolbar className={classes.toolbar}>
+                            <Button className={classes.button} fullWidth variant='contained' onClick={this.handleIncrement(-1)}><ChevronLeftIcon/>Prev</Button>
+                            <Button className={classes.button} fullWidth variant='contained' onClick={this.handleIncrement(1)}>Next<ChevronRightIcon/></Button>
+                        </Toolbar>
+                    </Paper>
+                </Hidden>
             </React.Fragment>
         );
 	}
