@@ -1,5 +1,6 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
+import Hidden from '@material-ui/core/Hidden';
 import ObjectLink from './ObjectLink';
 
 const styles = theme => ({
@@ -14,10 +15,23 @@ const styles = theme => ({
 
 class Team extends React.Component {
     render() {
-        const { classes, dense, name, points, record, image, url, win } = this.props;
+        const { classes, abbrev, name, points, record, image, url, win } = this.props;
+        const objectLinkProps = {
+            href: url,
+            image,
+            primary: name,
+            secondary: record,
+            secondText: points,
+            denseText: abbrev,
+        }
         return (
             <li className={win ? undefined : classes.tableRowLoser}>
-                <ObjectLink dense={dense} href={url} image={image} primary={name} secondary={record} secondText={points}/>
+                <Hidden xsDown>
+                    <ObjectLink {...objectLinkProps}/>
+                </Hidden>
+                <Hidden smUp>
+                    <ObjectLink dense {...objectLinkProps}/>
+                </Hidden>
             </li>
         );
     }

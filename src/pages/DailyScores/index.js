@@ -2,7 +2,9 @@ import React from 'react';
 import PropTypes from "prop-types";
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
+import Hidden from '@material-ui/core/Hidden';
+import Paper from '@material-ui/core/Paper';
+import Toolbar from '@material-ui/core/Toolbar';
 import Score from './components/Score';
 import SelectControl from '../../components/SelectControl';
 import { getScores } from '../../api/daily_scores';
@@ -11,12 +13,14 @@ import range from 'lodash/range';
 
 
 const styles = theme => ({
-    root: {
-        padding: '1rem 0',
+    paper: {
+        backgroundColor: theme.palette.background.default,
+        padding: theme.spacing.unit,
+        marginBottom: theme.spacing.unit * 2
     },
     button: {
-        padding: '1rem',
-        minWidth: 50,
+        padding: theme.spacing.unit,
+        maxWidth: 100,
     },
     row: {
         width: '100%',
@@ -25,10 +29,21 @@ const styles = theme => ({
     },
     toolbar: {
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
-        padding: '0 .5rem',
+        justifyContent: 'space-between',
+        padding: 0,
+        '&>*': {
+            margin: `0 ${theme.spacing.unit/2}px`
+        }
+    },
+    dateSelectors: {
+        display: 'flex',
+        margin: 'auto',
+        width: '100%',
+        maxWidth: 500,
+        '&>*': {
+            margin: `0 ${theme.spacing.unit/2}px`
+        },
     }
 });
 
@@ -103,37 +118,28 @@ class Scores extends React.Component {
 	render() {
         const { classes } = this.props;
         const { day, dayOptions, month, year } = this.state;
-		return (
-            <div className={classes.root}>
-                <div className={classes.toolbar}>
-                    <Grid container className={classes.row}>
-                        <Grid item xs={0} sm={2}>
-                            <Button className={classes.button} fullWidth={true} variant='contained' onClick={this.handleIncrement(-1)}>&#171;Prev</Button>
-                        </Grid>
-                        <Grid item xs={6} sm={4}>
-                            <SelectControl label='Month' onChange={this.handleDateChange('month')} value={month} options={months.map((value, i) => ({value: i + 1, label: value}))}/>
-                        </Grid>
-                        <Grid item xs={3} sm={2}>
-                            <SelectControl label='Day' onChange={this.handleDateChange('day')} value={day} options={dayOptions.map(value => ({value, label: value}))}/>
-                        </Grid>
-                        <Grid item xs={3} sm={2}>
-                            <SelectControl label='Year' onChange={this.handleDateChange('year')} value={year} options={this.years.map(value => ({value, label: value}))}/>
-                        </Grid>
-                        <Grid item xs={0} sm={2}>
-                            <Button className={classes.button} fullWidth={true} variant='contained' onClick={this.handleIncrement(1)}>Next&#187;</Button>
-                        </Grid>
-                    </Grid>
-                    <Grid container className={classes.row}>
-                        <Grid item xs={6} sm={0}>
-                            <Button className={classes.button} size='small' fullWidth={true} variant='contained' onClick={this.handleIncrement(-1)}>&#171;Prev</Button>
-                        </Grid>
-                        <Grid item xs={6} sm={0}>
-                            <Button className={classes.button} size='small' fullWidth={true} variant='contained' onClick={this.handleIncrement(1)}>Next&#187;</Button>
-                        </Grid>
-                    </Grid>
-                </div>
-                {this.state.data.map((score, i) => <Score key={i} {...score}/>)}
+        const dateSelectors = (
+            <div className={classes.dateSelectors}>
+                <SelectControl label='Month' onChange={this.handleDateChange('month')} value={month} options={months.map((value, i) => ({value: i + 1, label: value}))}/>
+                <SelectControl label='Day' onChange={this.handleDateChange('day')} value={day} options={dayOptions.map(value => ({value, label: value}))} maxWidth={100}/>
+                <SelectControl label='Year' onChange={this.handleDateChange('year')} value={year} options={this.years.map(value => ({value, label: value}))}/>
             </div>
+        );
+
+		return (
+            <React.Fragment>
+                <Paper className={classes.paper}>
+                    <Hidden smUp>
+                        {dateSelectors}
+                    </Hidden>
+                    <Toolbar className={classes.toolbar}>
+                        <Button className={classes.button} fullWidth variant='outlined' onClick={this.handleIncrement(-1)}>&#171;Prev</Button>
+                        <Hidden xsDown>{dateSelectors}</Hidden>
+                        <Button className={classes.button} fullWidth variant='outlined' onClick={this.handleIncrement(1)}>Next&#187;</Button>
+                    </Toolbar>
+                </Paper>
+                {this.state.data.map((score, i) => <Score key={i} {...score}/>)}
+            </React.Fragment>
         );
 	}
 }

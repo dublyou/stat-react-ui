@@ -3,7 +3,6 @@ import Profile from './pages/profile';
 import Paper from '@material-ui/core/Paper';
 import SimplePage from './pages/simple';
 import GridPage from './pages/grid';
-import Scores from './pages/DailyScores';
 import Navbar from './Navbar';
 
 class App extends Component {
@@ -24,8 +23,6 @@ class App extends Component {
         return <GridPage {...other}/>;
       case "comparison":
         return <SimplePage type="comparison" {...other}/>;
-      case "daily_scores":
-        return <Scores/>;
       default:
         return <SimplePage {...other}/>;
     }

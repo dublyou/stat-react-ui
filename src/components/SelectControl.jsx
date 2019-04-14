@@ -2,6 +2,7 @@ import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import OutlinedInput from '@material-ui/core/OutlinedInput';
 import InputLabel from '@material-ui/core/InputLabel';
+import ListItemText from '@material-ui/core/ListItemText';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
@@ -11,12 +12,14 @@ const styles = theme => ({
         zIndex: 2,
     },
     formControl: {
-        margin: `${theme.spacing.unit}px 0`,
         width: '100%',
     },
     select: {
-        paddingTop: '1rem',
-        paddingBottom: '1rem',
+        paddingTop: theme.spacing.unit * 2.5,
+        paddingBottom: theme.spacing.unit,
+    },
+    shrink: {
+        marginTop: theme.spacing.unit
     }
 });
 
@@ -27,14 +30,15 @@ class SelectControl extends React.Component {
     }
 
     render() {
-        const { classes, label, options, value } = this.props;
+        const { classes, label, options, value, maxWidth } = this.props;
         return (
-            <FormControl className={classes.formControl} variant="outlined">
+            <FormControl className={classes.formControl} variant="outlined" style={{maxWidth: maxWidth}}>
                 <InputLabel
                     className={classes.formLabel}
                     ref={ref => {
                         this.InputLabelRef = ref;
                     }}
+                    classes={{shrink: classes.shrink}}
                 >
                     {label}
                 </InputLabel>
@@ -50,7 +54,11 @@ class SelectControl extends React.Component {
                     classes={{select: classes.select}}
                 >
                     {options.map(option => {
-                        return <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                        return (
+                            <MenuItem key={option.value} value={option.value}>
+                                <ListItemText primary={option.label}/>
+                            </MenuItem>
+                        );
                     })}
                 </Select>
             </FormControl>
